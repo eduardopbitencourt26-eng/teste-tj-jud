@@ -54,7 +54,7 @@ o mesmo estágio base, então as extensões PHP são idênticas nos dois ambient
 | Arquivo | Quando é usado | Papel |
 |---|---|---|
 | `compose.yaml` | sempre | base comum: serviço `php` (FrankenPHP), serviço `database` (PostgreSQL), portas, volumes, variáveis compartilhadas |
-| `compose.override.yaml` | **automaticamente** em todo `docker compose ...` sem `-f` | desenvolvimento: estágio `frankenphp_dev`, código montado com bind mount (`./:/app`), Xdebug, worker em modo watch, portas do banco e do Mailpit expostas |
+| `compose.override.yaml` | **automaticamente** em todo `docker compose ...` sem `-f` | desenvolvimento: estágio `frankenphp_dev`, código montado com bind mount (`./:/app`), Xdebug, worker em modo watch, porta do banco exposta |
 | `compose.prod.yaml` | **só quando pedido explicitamente**: `docker compose -f compose.yaml -f compose.prod.yaml up` | produção: estágio `frankenphp_prod`, sem bind mount, exige `APP_SECRET` e segredos reais via variáveis de ambiente |
 
 O Docker Compose mescla os arquivos na ordem em que são passados. Como o override é carregado sozinho,
@@ -74,6 +74,13 @@ FROM dunglas/frankenphp:1.13.5-php8.5.12-trixie@sha256:7e73a27e...6a639c AS fran
 - O **digest** (`@sha256:...`) garante os mesmos bytes, mesmo que a tag seja republicada.
 - O digest fixado é o mesmo que a tag flutuante resolvia no dia da decisão, então a troca não mudou o
   ambiente já testado.
+- O digest é do **índice multi-arquitetura** (`application/vnd.oci.image.index.v1+json`), não do manifesto
+  de uma arquitetura só. O índice cobre `linux/amd64`, `linux/386`, `linux/arm/v7` e `linux/arm64`, então o
+  build continua funcionando em Macs com Apple Silicon (M1/M2/M3): o Docker escolhe a variante da máquina.
+  Para conferir: `docker buildx imagetools inspect dunglas/frankenphp:1.13.5-php8.5.12-trixie`.
+  Fixar o digest de um manifesto específico (o que aparece em `docker image inspect` depois de baixar a
+  imagem numa máquina) quebraria o build em outra arquitetura. Por isso o digest deve sempre ser copiado
+  do índice.
 
 ### Limpeza do template
 Foram removidos `LICENSE` (licença do template, não do projeto), `.devcontainer/` (configuração de Dev
@@ -88,7 +95,9 @@ O repositório entregue fica só com o que é do projeto, e `docs/` passa a cont
   instalar PHP 8.5, extensões e PostgreSQL na versão certa.
 - **Symfony 8.0** — mais novo, mas sem LTS.
 - **Manter a tag flutuante da imagem base** — atualizações automáticas, mas build não reproduzível.
-- **Fixar só a tag, sem digest** — legível, mas uma tag pode ser republicada apontando para outros bytes.
+- **Fixar só a tag, sem digest** — legível e mais simples de atualizar, mas uma tag pode ser republicada
+  apontando para outros bytes. A preocupação de que o digest quebraria o build em ARM foi avaliada e
+  descartada, porque o digest fixado é do índice multi-arquitetura.
 
 ## Consequências
 - O avaliador precisa só de Docker (com Compose v2). As portas 80/443 precisam estar livres ou ser
