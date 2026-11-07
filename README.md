@@ -95,6 +95,11 @@ aleatória, para não conflitar com um PostgreSQL local. Para ver qual foi: `doc
 `make` não vem instalado no Windows. Opções: rodar os comandos equivalentes, usar o WSL ou instalar com
 `winget install ezwinports.make`.
 
+**Editando código no Windows:** em dev, o servidor reinicia sozinho quando um arquivo de `src/` ou `config/`
+muda. No Docker Desktop do Windows, com o projeto numa pasta do Windows (`C:\...`), essas alterações não
+chegam ao container. Depois de editar PHP ou configuração, rode `docker compose restart php`. Templates Twig
+não precisam disso. Detalhes no [ADR 0011](docs/adr/0011-watch-do-worker-em-dev.md).
+
 ## Testes
 
 ```bash
@@ -170,3 +175,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0008 - Scripts SQL gerados a partir das migrations](docs/adr/0008-scripts-sql-gerados-das-migrations.md): fonte única da verdade.
 - [0009 - Estratégia de testes](docs/adr/0009-estrategia-de-testes.md): TDD nas regras críticas, amostra dos três tipos de teste.
 - [0010 - Regras de validação](docs/adr/0010-regras-de-validacao.md): campos obrigatórios, autor obrigatório, assunto opcional.
+- [0011 - Arquivos vigiados pelo worker em dev](docs/adr/0011-watch-do-worker-em-dev.md): o watch padrão reiniciava o servidor a cada template compilado.

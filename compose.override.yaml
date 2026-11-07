@@ -16,7 +16,14 @@ services:
       #  from the bind-mount for better performance by enabling the next line:
       #- /app/vendor
     environment:
-      FRANKENPHP_WORKER_CONFIG: watch
+      # Reinicia o worker só quando muda algo que exige um kernel novo. O padrão do "watch" incluiria
+      # var/cache/, e cada template compilado pelo Twig reiniciaria todas as threads (ADR 0011).
+      # Templates não precisam: o Twig recompila sozinho em dev.
+      FRANKENPHP_WORKER_CONFIG: |
+        watch ./src/**/*.php
+        watch ./config/**/*.{php,yaml,yml}
+        watch ./.env*
+        watch ./composer.lock
       FRANKENPHP_SITE_CONFIG: hot_reload
       MERCURE_EXTRA_DIRECTIVES: playground
       # See https://xdebug.org/docs/all_settings#mode
