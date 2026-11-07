@@ -39,8 +39,9 @@ que continuam como última barreira.
 - **Mensagens em pt-BR** escritas em cada constraint, específicas para o campo ("Informe o título.").
 
 ## Alternativas consideradas
-- **Validar só no formulário** (`constraints` no `FormType`) — a regra ficaria presa àquela tela. Outro
-  formulário, um comando ou uma importação gravariam livros sem validar.
+- **Validar só no formulário** (`constraints` no `FormType`) — a regra ficaria presa àquela tela. Com as
+  constraints na entidade, qualquer formulário ligado a ela as aplica, e um comando ou uma importação usa as
+  mesmas regras com uma chamada a `$validator->validate($livro)`.
 - **Confiar só no banco** — `NOT NULL` e `VARCHAR` barram os dados, mas a mensagem é um erro do driver.
   O banco também não impede um livro sem autor: o vínculo fica em outra tabela.
 - **Assunto obrigatório** — o enunciado não exige, e o relatório já prevê livro sem assunto.
@@ -51,4 +52,8 @@ que continuam como última barreira.
 - O teste `tests/Unit/Entity/LivroValidacaoTest.php` cobre a validação do livro (ADR 0009). As regras de
   `Autor` e `Assunto` seguem o mesmo padrão e não têm teste próprio.
 - Os formulários da Fase 3 mostram essas mensagens ao lado de cada campo, sem regra duplicada no `FormType`.
-- O vínculo com autor é validado no objeto antes do `flush`. Gravar direto no banco não passa por essa regra.
+- **O Doctrine não valida no `flush`.** A validação roda quando o formulário é submetido (`$form->isValid()`)
+  ou quando o código chama o validador. Gravar sem passar por nenhum dos dois, ou direto no banco, não aplica
+  a regra de autor obrigatório: o banco não tem como exigir que exista uma linha em `livro_autor`.
+- O auto-mapping do validator (`framework.validation.auto_mapping`, que deduz constraints do mapeamento
+  Doctrine) continua desligado, como veio da receita. As regras ficam escritas na entidade, à vista.
