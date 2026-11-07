@@ -1,60 +1,123 @@
-# Symfony Docker
+# Cadastro de Livros
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework,
-with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) inside!
+Teste técnico: CRUD de Livros, Autores e Assuntos com relatório agrupado por autor, em Symfony 7.4 LTS.
 
-Coding-agents ready: ships with a [Dev Container](https://containers.dev/) and a [one-page guide](docs/agents.md)
-to run [OpenCode](https://opencode.ai), [Claude Code](https://claude.ai/claude-code), or any AI coding assistant,
-against a local or a remote model, with an optional network sandbox.
+> Documento em construção: as seções marcadas como *(em construção)* são completadas nas próximas etapas.
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+## Stack
 
-## Getting Started
+| Camada | Tecnologia |
+|---|---|
+| Linguagem | PHP 8.5 |
+| Framework | Symfony 7.4 LTS |
+| Servidor | FrankenPHP (Caddy) em modo worker |
+| Banco de dados | PostgreSQL 16 |
+| ORM | Doctrine ORM + Doctrine Migrations |
+| Ambiente | Docker, a partir do template oficial [symfony-docker](https://github.com/dunglas/symfony-docker) |
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --pull --no-cache` to build fresh images
-3. Run `docker compose up --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+Os motivos de cada escolha estão nos [ADRs](#decisões-de-arquitetura-adrs).
 
-## Features
+## Pré-requisitos
 
-- Production, development and CI ready
-- Just 1 service by default
-- Super-readable configuration
-- Blazing-fast performance thanks to [the worker mode of FrankenPHP](https://frankenphp.dev/docs/worker/)
-- [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-- Automatic HTTPS (in dev and prod)
-- HTTP/3 and [Early Hints](https://symfony.com/blog/new-in-symfony-6-3-early-hints) support
-- Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
-- [Vulcain](https://vulcain.rocks) support
-- Native [XDebug](docs/xdebug.md) integration
-- [Hot Reloading](https://frankenphp.dev/docs/hot-reload/)
-- [Dev Container](https://containers.dev/) support
-- [AI coding agents](docs/agents.md) with an optional network sandbox
-- Rootless, slim production image
+- [Docker](https://docs.docker.com/get-docker/) com Docker Compose v2 (`docker compose version`).
+- Portas **80** e **443** livres no host. Se estiverem ocupadas, veja [Trocar portas](#trocar-portas-ocupadas).
+- Opcional: `make`, para usar os atalhos do `Makefile`. Todos os atalhos têm o comando equivalente abaixo.
 
-**Enjoy!**
+Não é preciso instalar PHP, Composer nem PostgreSQL: tudo roda em containers.
 
-## Docs
+## Instalação do zero
 
-1. [Options available](docs/options.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using MySQL instead of PostgreSQL](docs/mysql.md)
-8. [Using Alpine Linux instead of Debian](docs/alpine.md)
-9. [Using a Makefile](docs/makefile.md)
-10. [Updating the template](docs/updating.md)
-11. [Troubleshooting](docs/troubleshooting.md)
-12. [Using AI coding agents](docs/agents.md)
+```bash
+git clone <url-do-repositorio> livros
+cd livros
 
-## License
+docker compose build --pull --no-cache
+docker compose up --wait
+docker compose exec php composer install --no-interaction
+docker compose exec php bin/console doctrine:database:create --if-not-exists
+docker compose exec php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+```
 
-Symfony Docker is available under the MIT License.
+Com `make`, os mesmos passos são `make setup`.
 
-## Credits
+Depois, acesse **https://localhost**. O certificado é gerado por uma autoridade certificadora local do
+Caddy, então o navegador mostra um aviso na primeira vez: aceite a exceção.
 
-Created by [Kévin Dunglas](https://dunglas.dev), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+Para parar: `docker compose down` (mantém os dados). Para apagar também o banco: `docker compose down -v`.
+
+## Trocar portas ocupadas
+
+Por padrão o container publica as portas 80 (HTTP) e 443 (HTTPS e HTTP/3). Se outro programa já usa essas
+portas (Apache, IIS, outro container), suba com outras portas pelas variáveis `HTTP_PORT`, `HTTPS_PORT`
+e `HTTP3_PORT`:
+
+```bash
+# Linux, macOS, Git Bash
+HTTP_PORT=8080 HTTPS_PORT=8443 HTTP3_PORT=8443 docker compose up --wait
+```
+
+```powershell
+# PowerShell
+$env:HTTP_PORT=8080; $env:HTTPS_PORT=8443; $env:HTTP3_PORT=8443; docker compose up --wait
+```
+
+A aplicação passa a responder em **https://localhost:8443**.
+
+Para não repetir as variáveis, coloque-as no `.env.local`, que não é versionado:
+
+```bash
+printf 'HTTP_PORT=8080\nHTTPS_PORT=8443\nHTTP3_PORT=8443\n' >> .env.local
+docker compose --env-file .env --env-file .env.local up --wait
+```
+
+Não coloque as portas no `.env`: ele é versionado e vale para todos (ver [ADR 0003](docs/adr/0003-variaveis-de-ambiente.md)).
+O Docker Compose lê sozinho apenas o `.env`; o `.env.local` precisa ser passado com `--env-file`, e o último
+arquivo informado vence.
+
+Para descobrir quem ocupa uma porta: `netstat -ano | findstr :80` (Windows) ou `sudo lsof -i :80` (Linux/macOS).
+
+O PostgreSQL não usa porta fixa no host: em desenvolvimento a porta 5432 do container é publicada numa porta
+aleatória, para não conflitar com um PostgreSQL local. Para ver qual foi: `docker compose port database 5432`.
+
+## Comandos do dia a dia
+
+| `make` | Comando equivalente | O que faz |
+|---|---|---|
+| `make up` | `docker compose up --wait` | Sobe os containers |
+| `make down` | `docker compose down --remove-orphans` | Para os containers (mantém os dados) |
+| `make logs` | `docker compose logs --tail=100 --follow` | Acompanha os logs |
+| `make sh` | `docker compose exec php bash` | Shell dentro do container PHP |
+| `make console c="about"` | `docker compose exec php bin/console about` | Roda um comando do Symfony |
+| `make reset-db` | ver `Makefile` | Apaga e recria o banco de desenvolvimento |
+| `make build-assets` | `docker compose exec php bin/console asset-map:compile` | Compila os assets *(muda na etapa de front-end)* |
+
+`make` não vem instalado no Windows. Opções: rodar os comandos equivalentes, usar o WSL ou instalar com
+`winget install ezwinports.make`.
+
+## Testes
+
+```bash
+docker compose exec php bin/console --env=test doctrine:database:create --if-not-exists
+docker compose exec php bin/console --env=test doctrine:migrations:migrate --no-interaction --allow-no-migration
+docker compose exec php bin/phpunit
+```
+
+Com `make`: `make test`. Os testes usam um banco separado (`app_test`), então não alteram os dados de
+desenvolvimento.
+
+## Scripts SQL
+
+*(em construção)* A pasta `database/` vai conter os scripts SQL puros para criar as tabelas, a view do
+relatório e a carga inicial sem depender do Doctrine.
+
+## Estrutura do projeto
+
+*(em construção)*
+
+## Decisões de arquitetura (ADRs)
+
+Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
+
+- [0001 - Stack e ambiente de execução](docs/adr/0001-stack-e-ambiente.md): Docker, symfony-docker, Symfony 7.4 LTS, FrankenPHP, Dockerfile multi-stage, arquivos compose, versão fixada da imagem base.
+- [0002 - PostgreSQL como banco de dados](docs/adr/0002-postgresql.md)
+- [0003 - Variáveis de ambiente e arquivos .env](docs/adr/0003-variaveis-de-ambiente.md): por que o `.env` é versionado no Symfony.
