@@ -89,6 +89,7 @@ aleatória, para não conflitar com um PostgreSQL local. Para ver qual foi: `doc
 | `make sh` | `docker compose exec php bash` | Shell dentro do container PHP |
 | `make console c="about"` | `docker compose exec php bin/console about` | Roda um comando do Symfony |
 | `make reset-db` | ver `Makefile` | Apaga e recria o banco de desenvolvimento |
+| `make sql-export` | `docker compose exec -T php sh bin/sql-export` | Regenera os scripts de `database/` a partir das migrations |
 | `make build-assets` | `docker compose exec php bin/console asset-map:compile` | Compila os assets *(muda na etapa de front-end)* |
 
 `make` não vem instalado no Windows. Opções: rodar os comandos equivalentes, usar o WSL ou instalar com
@@ -107,8 +108,41 @@ desenvolvimento.
 
 ## Scripts SQL
 
-*(em construção)* A pasta `database/` vai conter os scripts SQL puros para criar as tabelas, a view do
-relatório e a carga inicial sem depender do Doctrine.
+A pasta [`database/`](database/) tem scripts SQL puros, para criar o banco sem o Doctrine (por exemplo,
+quando um DBA aplica o esquema). **Eles são gerados a partir das migrations, não escritos à mão:** as
+entidades e as migrations são a fonte única da verdade
+([ADR 0008](docs/adr/0008-scripts-sql-gerados-das-migrations.md)).
+
+| Script | Conteúdo | Gerado de |
+|---|---|---|
+| [`01_create_tables.sql`](database/01_create_tables.sql) | Tabelas `livro`, `autor`, `assunto`, `livro_autor` e `livro_assunto` | `migrations/Version20261107185619.php` |
+| `02_view_relatorio.sql` | *(em construção)* View do relatório | |
+| `03_carga_inicial.sql` | *(em construção)* Dados de exemplo | |
+
+Para aplicar, em ordem, num banco vazio (`-1` roda cada script numa transação só):
+
+```bash
+docker compose exec -T database psql -U app -d app -1 -v ON_ERROR_STOP=1 < database/01_create_tables.sql
+```
+
+Use **ou** os scripts **ou** as migrations no mesmo banco, não os dois: as tabelas já existiriam.
+Os nomes seguem o modelo do enunciado em minúsculas (`Livro.CodL` → `livro.codl`), conforme o
+[ADR 0005](docs/adr/0005-identificadores-no-postgresql.md).
+
+### Regenerar os scripts
+
+Sempre que uma migration for criada ou alterada:
+
+```bash
+make sql-export
+# sem make:
+docker compose exec -T php sh bin/sql-export
+```
+
+O [`bin/sql-export`](bin/sql-export) roda `doctrine:migrations:execute --up --write-sql` para cada migration,
+num banco descartável que é criado e apagado na hora. O banco de desenvolvimento não é tocado. Uma migration
+nova entra na lista `SCRIPTS` no topo do arquivo, com o nome do script que ela gera. Rodar de novo sem mudanças
+nas migrations produz arquivos idênticos.
 
 ## Estrutura do projeto
 
@@ -122,3 +156,7 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0002 - PostgreSQL como banco de dados](docs/adr/0002-postgresql.md)
 - [0003 - Variáveis de ambiente e arquivos .env](docs/adr/0003-variaveis-de-ambiente.md): por que o `.env` é versionado no Symfony.
 - [0004 - Remoção de pacotes do webapp fora do escopo](docs/adr/0004-remocao-de-pacotes-fora-do-escopo.md): Messenger, Mailer e Notifier.
+- [0005 - Nomes de tabelas e colunas no PostgreSQL](docs/adr/0005-identificadores-no-postgresql.md): identificadores sem aspas, em minúsculas.
+- [0006 - DECIMAL para valores monetários](docs/adr/0006-decimal-para-dinheiro.md)
+- [0007 - Chaves primárias, tabelas associativas e exclusão](docs/adr/0007-chaves-e-tabelas-associativas.md): PK composta nas N:N, IDENTITY, `ON DELETE`, nomes de índices.
+- [0008 - Scripts SQL gerados a partir das migrations](docs/adr/0008-scripts-sql-gerados-das-migrations.md): fonte única da verdade.

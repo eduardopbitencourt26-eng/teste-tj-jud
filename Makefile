@@ -5,7 +5,7 @@ PHP            = $(DOCKER_COMPOSE) exec php
 CONSOLE        = $(PHP) bin/console
 
 .DEFAULT_GOAL := help
-.PHONY: help build up down logs sh console setup test reset-db build-assets
+.PHONY: help build up down logs sh console setup test reset-db sql-export build-assets
 
 help: ## Lista os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-14s\033[0m %s\n", $$1, $$2}'
@@ -42,6 +42,9 @@ reset-db: ## Apaga e recria o banco de desenvolvimento
 	$(CONSOLE) doctrine:database:drop --force --if-exists
 	$(CONSOLE) doctrine:database:create
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction --allow-no-migration
+
+sql-export: ## Regenera os scripts de database/ a partir das migrations
+	$(DOCKER_COMPOSE) exec -T php sh bin/sql-export
 
 build-assets: ## Compila os assets do front-end
 	$(CONSOLE) asset-map:compile

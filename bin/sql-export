@@ -1,0 +1,38 @@
+#!/bin/sh
+# Gera os scripts de database/ a partir das migrations, que são a fonte única da verdade (ADR 0008).
+# Roda dentro do container php: docker compose exec php sh bin/sql-export  (ou: make sql-export)
+set -eu
+
+# Script de database/ e a migration que o gera, na ordem em que devem ser aplicados.
+SCRIPTS='
+01_create_tables Version20261107185619
+'
+
+# O Doctrine precisa de uma conexão para gerar o SQL. Usamos um banco descartável, criado vazio e apagado
+# no fim, para não depender do estado do banco de desenvolvimento.
+DATABASE_URL=$(printf '%s' "$DATABASE_URL" | sed -E 's#/[^/?]+\?#/app_sqlexport?#')
+export DATABASE_URL
+
+console() { bin/console --no-interaction --quiet "$@" </dev/null; }
+
+console doctrine:database:drop --force --if-exists
+console doctrine:database:create
+trap 'console doctrine:database:drop --force --if-exists' EXIT
+
+printf '%s\n' "$SCRIPTS" | while read -r nome versao; do
+    [ -n "$nome" ] || continue
+    arquivo="database/$nome.sql"
+    bruto="var/$nome.sql"
+
+    console doctrine:migrations:execute "DoctrineMigrations\\$versao" --up --write-sql="$bruto"
+
+    # Cabeçalho fixo no lugar da data de geração, para que regenerar sem mudanças não altere o arquivo.
+    {
+        printf -- '-- Gerado por bin/sql-export a partir de migrations/%s.php. Não edite à mão.\n' "$versao"
+        printf -- '-- Para regenerar: make sql-export. Para aplicar: ver "Scripts SQL" no README.\n\n'
+        grep -v -e '^-- Doctrine Migration File Generated on' -e '^-- Version ' "$bruto" | sed '/./,$!d'
+    } > "$arquivo"
+    rm -f "$bruto"
+
+    echo "Gerado: $arquivo"
+done

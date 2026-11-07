@@ -32,7 +32,7 @@ pela receita do DoctrineBundle.
 
 ## Consequências
 - O PostgreSQL converte identificadores sem aspas para minúsculas. Isso afeta os nomes do modelo de dados
-  (`Livro`, `CodI`...) e será decidido em ADR próprio na Fase 1.
+  (`Livro`, `CodL`...) e será decidido em ADR próprio na Fase 1.
 - A extensão `pdo_pgsql` entra no estágio base do `Dockerfile` (a receita do Doctrine adicionou no bloco
   `###> recipes ###`).
 - Os dados ficam no volume `database_data`. `docker compose down` preserva os dados, `docker compose down -v`
