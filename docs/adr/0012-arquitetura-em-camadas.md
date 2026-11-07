@@ -30,7 +30,8 @@ Três camadas, cada uma com uma responsabilidade:
 - **Rotas em português**, por atributo, com prefixo na classe: `/assuntos`, `/assuntos/novo`,
   `/assuntos/{codAs}/editar`, `/assuntos/{codAs}/excluir` (nomes `assunto_listar`, `assunto_novo` etc.).
 - **Partials reutilizáveis:** `_flash.html.twig`, `_form_actions.html.twig` e `_excluir.html.twig` servem
-  os três CRUDs.
+  os três CRUDs. O `_menu.html.twig`, incluído no layout, marca o item ativo pelo prefixo do nome da rota
+  (`autor_`, `assunto_`).
 
 ## Alternativas consideradas
 - **Controller com EntityManager (como o maker gera)** — menos arquivos, mas a regra de exclusão ficaria

@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Autores{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Autores</h1>
+        <a href="{{ path('autor_novo') }}" class="btn btn-primary">Novo autor</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col" class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for autor in autores %}
+                <tr>
+                    <td>{{ autor.codAu }}</td>
+                    <td>{{ autor.nome }}</td>
+                    <td class="text-end">
+                        <a href="{{ path('autor_editar', {codAu: autor.codAu}) }}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        {{ include('_excluir.html.twig', {
+                            url: path('autor_excluir', {codAu: autor.codAu}),
+                            token_id: 'excluir_autor_' ~ autor.codAu,
+                            confirmacao: 'Excluir o autor "' ~ autor.nome ~ '"?',
+                        }) }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Nenhum autor cadastrado.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

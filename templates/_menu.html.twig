@@ -1,0 +1,18 @@
+{% set rota = app.request.attributes.get('_route') ?? '' %}
+{% set itens = [
+    {rotulo: 'Autores', rota: 'autor_listar', prefixo: 'autor_'},
+    {rotulo: 'Assuntos', rota: 'assunto_listar', prefixo: 'assunto_'},
+] %}
+<nav class="navbar navbar-expand bg-body-tertiary border-bottom">
+    <div class="container">
+        <span class="navbar-brand">Cadastro de Livros</span>
+        <ul class="navbar-nav">
+            {% for item in itens %}
+                {% set ativo = rota starts with item.prefixo %}
+                <li class="nav-item">
+                    <a href="{{ path(item.rota) }}" class="nav-link{{ ativo ? ' active' }}"{{ ativo ? ' aria-current="page"' }}>{{ item.rotulo }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</nav>
