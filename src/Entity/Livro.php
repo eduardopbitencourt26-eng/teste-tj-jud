@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LivroRepository::class)]
 #[ORM\Table(name: 'livro')]
@@ -18,21 +19,35 @@ class Livro
     private ?int $codL = null;
 
     #[ORM\Column(name: 'titulo', type: Types::STRING, length: 40)]
+    #[Assert\NotBlank(message: 'Informe o título.', normalizer: 'trim')]
+    #[Assert\Length(max: 40, maxMessage: 'O título deve ter no máximo {{ limit }} caracteres.')]
     private ?string $titulo = null;
 
     #[ORM\Column(name: 'editora', type: Types::STRING, length: 40)]
+    #[Assert\NotBlank(message: 'Informe a editora.', normalizer: 'trim')]
+    #[Assert\Length(max: 40, maxMessage: 'A editora deve ter no máximo {{ limit }} caracteres.')]
     private ?string $editora = null;
 
     #[ORM\Column(name: 'edicao', type: Types::INTEGER)]
+    #[Assert\NotNull(message: 'Informe a edição.')]
+    #[Assert\Positive(message: 'A edição deve ser maior que zero.')]
     private ?int $edicao = null;
 
     #[ORM\Column(name: 'anopublicacao', type: Types::STRING, length: 4)]
+    #[Assert\NotBlank(message: 'Informe o ano de publicação.')]
+    #[Assert\Regex(pattern: '/^\d{4}$/', message: 'O ano de publicação deve ter 4 dígitos, como 1999.')]
     private ?string $anoPublicacao = null;
 
     /**
      * DECIMAL chega ao PHP como string ("1234.56") para não perder precisão em float.
+     * O Regex espelha DECIMAL(10,2): sem sinal (não negativo), até 8 dígitos inteiros e até 2 casas.
      */
     #[ORM\Column(name: 'valor', type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Assert\NotBlank(message: 'Informe o valor.')]
+    #[Assert\Regex(
+        pattern: '/^\d{1,8}(\.\d{1,2})?$/',
+        message: 'O valor deve estar entre 0,00 e 99.999.999,99, com até 2 casas decimais.',
+    )]
     private ?string $valor = null;
 
     /**
@@ -45,6 +60,7 @@ class Livro
     #[ORM\JoinTable(name: 'livro_autor')]
     #[ORM\JoinColumn(name: 'livro_codl', referencedColumnName: 'codl', nullable: false, onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'autor_codau', referencedColumnName: 'codau', nullable: false)]
+    #[Assert\Count(min: 1, minMessage: 'Informe ao menos um autor.')]
     private Collection $autores;
 
     /**

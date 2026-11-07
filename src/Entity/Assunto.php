@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AssuntoRepository::class)]
 #[ORM\Table(name: 'assunto')]
@@ -18,6 +19,8 @@ class Assunto
     private ?int $codAs = null;
 
     #[ORM\Column(name: 'descricao', type: Types::STRING, length: 20)]
+    #[Assert\NotBlank(message: 'Informe a descrição.', normalizer: 'trim')]
+    #[Assert\Length(max: 20, maxMessage: 'A descrição deve ter no máximo {{ limit }} caracteres.')]
     private ?string $descricao = null;
 
     /**

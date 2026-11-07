@@ -169,3 +169,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0007 - Chaves primárias, tabelas associativas e exclusão](docs/adr/0007-chaves-e-tabelas-associativas.md): PK composta nas N:N, IDENTITY, `ON DELETE`, nomes de índices.
 - [0008 - Scripts SQL gerados a partir das migrations](docs/adr/0008-scripts-sql-gerados-das-migrations.md): fonte única da verdade.
 - [0009 - Estratégia de testes](docs/adr/0009-estrategia-de-testes.md): TDD nas regras críticas, amostra dos três tipos de teste.
+- [0010 - Regras de validação](docs/adr/0010-regras-de-validacao.md): campos obrigatórios, autor obrigatório, assunto opcional.
