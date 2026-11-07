@@ -106,6 +106,14 @@ docker compose exec php bin/phpunit
 Com `make`: `make test`. Os testes usam um banco separado (`app_test`), então não alteram os dados de
 desenvolvimento.
 
+A suíte é uma amostra enxuta: TDD nas regras de negócio críticas, cobrindo os três tipos de teste
+(unitário, integração e funcional). O plano completo está no
+[ADR 0009](docs/adr/0009-estrategia-de-testes.md).
+
+| Teste | Tipo | Arquivo |
+|---|---|---|
+| Validação do livro | Unitário | [`tests/Unit/Entity/LivroValidacaoTest.php`](tests/Unit/Entity/LivroValidacaoTest.php) |
+
 ## Scripts SQL
 
 A pasta [`database/`](database/) tem scripts SQL puros, para criar o banco sem o Doctrine (por exemplo,
@@ -160,3 +168,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0006 - DECIMAL para valores monetários](docs/adr/0006-decimal-para-dinheiro.md)
 - [0007 - Chaves primárias, tabelas associativas e exclusão](docs/adr/0007-chaves-e-tabelas-associativas.md): PK composta nas N:N, IDENTITY, `ON DELETE`, nomes de índices.
 - [0008 - Scripts SQL gerados a partir das migrations](docs/adr/0008-scripts-sql-gerados-das-migrations.md): fonte única da verdade.
+- [0009 - Estratégia de testes](docs/adr/0009-estrategia-de-testes.md): TDD nas regras críticas, amostra dos três tipos de teste.
