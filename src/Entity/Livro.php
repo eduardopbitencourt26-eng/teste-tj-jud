@@ -58,8 +58,8 @@ class Livro
      */
     #[ORM\ManyToMany(targetEntity: Autor::class, inversedBy: 'livros')]
     #[ORM\JoinTable(name: 'livro_autor')]
-    #[ORM\JoinColumn(name: 'livro_codl', referencedColumnName: 'codl', nullable: false, onDelete: 'CASCADE')]
-    #[ORM\InverseJoinColumn(name: 'autor_codau', referencedColumnName: 'codau', nullable: false)]
+    #[ORM\JoinColumn(name: 'livro_codl', referencedColumnName: 'codl', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'autor_codau', referencedColumnName: 'codau')]
     #[Assert\Count(min: 1, minMessage: 'Informe ao menos um autor.')]
     private Collection $autores;
 
@@ -68,8 +68,8 @@ class Livro
      */
     #[ORM\ManyToMany(targetEntity: Assunto::class, inversedBy: 'livros')]
     #[ORM\JoinTable(name: 'livro_assunto')]
-    #[ORM\JoinColumn(name: 'livro_codl', referencedColumnName: 'codl', nullable: false, onDelete: 'CASCADE')]
-    #[ORM\InverseJoinColumn(name: 'assunto_codas', referencedColumnName: 'codas', nullable: false)]
+    #[ORM\JoinColumn(name: 'livro_codl', referencedColumnName: 'codl', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'assunto_codas', referencedColumnName: 'codas')]
     private Collection $assuntos;
 
     public function __construct()
