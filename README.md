@@ -176,3 +176,5 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0009 - Estratégia de testes](docs/adr/0009-estrategia-de-testes.md): TDD nas regras críticas, amostra dos três tipos de teste.
 - [0010 - Regras de validação](docs/adr/0010-regras-de-validacao.md): campos obrigatórios, autor obrigatório, assunto opcional.
 - [0011 - Arquivos vigiados pelo worker em dev](docs/adr/0011-watch-do-worker-em-dev.md): o watch padrão reiniciava o servidor a cada template compilado.
+- [0012 - Arquitetura em camadas](docs/adr/0012-arquitetura-em-camadas.md): Controller fino, Service com os casos de uso, Repository com as consultas.
+- [0013 - make:crud como ponto de partida](docs/adr/0013-make-crud-como-ponto-de-partida.md): o que mudou no código gerado e por quê.

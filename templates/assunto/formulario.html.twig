@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-3">{{ titulo }}</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        {{ include('_form_actions.html.twig', {voltar_url: path('assunto_listar')}) }}
+    {{ form_end(form) }}
+{% endblock %}

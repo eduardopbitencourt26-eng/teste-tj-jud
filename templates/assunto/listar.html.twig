@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assuntos{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Assuntos</h1>
+        <a href="{{ path('assunto_novo') }}" class="btn btn-primary">Novo assunto</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col" class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for assunto in assuntos %}
+                <tr>
+                    <td>{{ assunto.codAs }}</td>
+                    <td>{{ assunto.descricao }}</td>
+                    <td class="text-end">
+                        <a href="{{ path('assunto_editar', {codAs: assunto.codAs}) }}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        {{ include('_excluir.html.twig', {
+                            url: path('assunto_excluir', {codAs: assunto.codAs}),
+                            token_id: 'excluir_assunto_' ~ assunto.codAs,
+                            confirmacao: 'Excluir o assunto "' ~ assunto.descricao ~ '"?',
+                        }) }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Nenhum assunto cadastrado.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

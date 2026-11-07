@@ -1,0 +1,8 @@
+{#
+    Botão de exclusão: sempre POST, com token CSRF próprio do registro.
+    Parâmetros: url (rota de exclusão), token_id (o mesmo conferido no controller), confirmacao (pergunta ao usuário).
+#}
+<form method="post" action="{{ url }}" class="d-inline" onsubmit="return confirm('{{ confirmacao|e('js') }}');">
+    <input type="hidden" name="_token" value="{{ csrf_token(token_id) }}">
+    <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+</form>
