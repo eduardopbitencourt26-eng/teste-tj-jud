@@ -118,6 +118,10 @@ A suíte é uma amostra enxuta: TDD nas regras de negócio críticas, cobrindo o
 | Teste | Tipo | Arquivo |
 |---|---|---|
 | Validação do livro | Unitário | [`tests/Unit/Entity/LivroValidacaoTest.php`](tests/Unit/Entity/LivroValidacaoTest.php) |
+| Listagem de livros e cadastro com 2 autores | Funcional | [`tests/Functional/LivroControllerTest.php`](tests/Functional/LivroControllerTest.php) |
+
+Cada teste roda numa transação desfeita ao final (`dama/doctrine-test-bundle`), então o banco de teste
+não acumula dados entre execuções.
 
 ## Scripts SQL
 
@@ -178,3 +182,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0011 - Arquivos vigiados pelo worker em dev](docs/adr/0011-watch-do-worker-em-dev.md): o watch padrão reiniciava o servidor a cada template compilado.
 - [0012 - Arquitetura em camadas](docs/adr/0012-arquitetura-em-camadas.md): Controller fino, Service com os casos de uso, Repository com as consultas.
 - [0013 - make:crud como ponto de partida](docs/adr/0013-make-crud-como-ponto-de-partida.md): o que mudou no código gerado e por quê.
+- [0014 - Formulário do livro](docs/adr/0014-formulario-do-livro.md): valor em R$ sem float, recusa de mais de 2 casas, autores e assuntos em caixas de seleção.

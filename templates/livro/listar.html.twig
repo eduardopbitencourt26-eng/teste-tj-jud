@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livros{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Livros</h1>
+        <a href="{{ path('livro_novo') }}" class="btn btn-primary">Novo livro</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Título</th>
+                    <th scope="col">Autores</th>
+                    <th scope="col">Assuntos</th>
+                    <th scope="col">Editora</th>
+                    <th scope="col" class="text-end">Edição</th>
+                    <th scope="col" class="text-end">Ano</th>
+                    <th scope="col" class="text-end">Valor</th>
+                    <th scope="col" class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for livro in livros %}
+                <tr>
+                    <td>{{ livro.codL }}</td>
+                    <td>{{ livro.titulo }}</td>
+                    <td>{{ livro.autores|map(autor => autor.nome)|join(', ') }}</td>
+                    <td>{{ livro.assuntos|map(assunto => assunto.descricao)|join(', ')|default('—') }}</td>
+                    <td>{{ livro.editora }}</td>
+                    <td class="text-end">{{ livro.edicao }}ª</td>
+                    <td class="text-end">{{ livro.anoPublicacao }}</td>
+                    <td class="text-end text-nowrap">{{ livro.valor|format_currency('BRL') }}</td>
+                    <td class="text-end text-nowrap">
+                        <a href="{{ path('livro_editar', {codL: livro.codL}) }}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        {{ include('_excluir.html.twig', {
+                            url: path('livro_excluir', {codL: livro.codL}),
+                            token_id: 'excluir_livro_' ~ livro.codL,
+                            confirmacao: 'Excluir o livro "' ~ livro.titulo ~ '"?',
+                        }) }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">Nenhum livro cadastrado.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

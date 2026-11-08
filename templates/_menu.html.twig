@@ -1,5 +1,6 @@
 {% set rota = app.request.attributes.get('_route') ?? '' %}
 {% set itens = [
+    {rotulo: 'Livros', rota: 'livro_listar', prefixo: 'livro_'},
     {rotulo: 'Autores', rota: 'autor_listar', prefixo: 'autor_'},
     {rotulo: 'Assuntos', rota: 'assunto_listar', prefixo: 'assunto_'},
 ] %}
