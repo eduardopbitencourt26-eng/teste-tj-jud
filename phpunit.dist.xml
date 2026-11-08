@@ -23,8 +23,10 @@
         </testsuite>
     </testsuites>
 
+    <!-- ignoreIndirectDeprecations false: uma deprecação disparada dentro do vendor por causa de uma chamada
+         nossa (ex.: orderBy com 'ASC' no ORM 3.7) conta como indireta e passaria em silêncio. -->
     <source ignoreSuppressionOfDeprecations="true"
-            ignoreIndirectDeprecations="true"
+            ignoreIndirectDeprecations="false"
             restrictNotices="true"
             restrictWarnings="true"
     >
@@ -40,5 +42,7 @@
     </source>
 
     <extensions>
+        <!-- Cada teste roda numa transação desfeita ao final: o banco de teste volta limpo (ADR 0009). -->
+        <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
     </extensions>
 </phpunit>
