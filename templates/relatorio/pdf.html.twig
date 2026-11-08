@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de livros por autor</title>
+    <style>
+        @page { margin: 1.5cm 1.2cm; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 9pt; color: #1e2a32; }
+        h1 { font-size: 15pt; color: #1f5f7a; margin: 0 0 2pt; }
+        .small { font-size: 8pt; }
+        .text-body-secondary { color: #5c6b77; }
+        .text-end { text-align: right; }
+        .text-nowrap { white-space: nowrap; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 10pt; table-layout: fixed; }
+        .table th, .table td { padding: 3pt 4pt; border-bottom: 0.5pt solid #d5dce2; text-align: left; }
+        .table th.text-end, .table td.text-end { text-align: right; }
+        thead th { font-size: 8pt; color: #5c6b77; }
+        .cabecalho-autor { font-size: 10pt; color: #ffffff; background: #1f5f7a; margin: 0; padding: 3pt 4pt; }
+        tfoot td { font-weight: bold; background: #f4f6f8; }
+        .total-relatorio th { font-size: 10pt; border-top: 1pt solid #1f5f7a; border-bottom: none; }
+        .grupo-relatorio { page-break-inside: avoid; }
+    </style>
+</head>
+<body>
+    <h1>Relatório de livros por autor</h1>
+    {{ include('relatorio/_conteudo.html.twig') }}
+</body>
+</html>

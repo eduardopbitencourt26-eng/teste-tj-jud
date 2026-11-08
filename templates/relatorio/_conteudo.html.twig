@@ -1,0 +1,52 @@
+<p class="text-body-secondary small">Gerado em {{ relatorio.geradoEm|date('d/m/Y \\à\\s H:i') }}</p>
+
+{% for grupo in relatorio.grupos %}
+    <div class="grupo-relatorio">
+    <h2 class="cabecalho-autor">{{ grupo.autor }}</h2>
+    <table class="table table-sm align-middle tabela-relatorio">
+        <thead>
+            <tr>
+                <th scope="col" style="width: 30%">Título</th>
+                <th scope="col" style="width: 18%">Editora</th>
+                <th scope="col" class="text-end" style="width: 9%">Edição</th>
+                <th scope="col" class="text-end" style="width: 8%">Ano</th>
+                <th scope="col" style="width: 20%">Assuntos</th>
+                <th scope="col" class="text-end" style="width: 15%">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for livro in grupo.livros %}
+                <tr>
+                    <td>{{ livro.titulo }}</td>
+                    <td>{{ livro.editora }}</td>
+                    <td class="text-end">{{ livro.edicao }}ª</td>
+                    <td class="text-end">{{ livro.ano_publicacao }}</td>
+                    <td>{{ livro.assuntos ?? '—' }}</td>
+                    <td class="text-end text-nowrap">{{ livro.valor|format_currency('BRL') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">{{ grupo.quantidade }} {{ grupo.quantidade == 1 ? 'livro' : 'livros' }}</td>
+                <td class="text-end text-nowrap">{{ grupo.subtotal|format_currency('BRL') }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    </div>
+{% else %}
+    <p>Nenhum livro cadastrado.</p>
+{% endfor %}
+
+{% if relatorio.grupos is not empty %}
+    <table class="table table-sm total-relatorio">
+        <tr>
+            <th>Total geral: {{ relatorio.quantidadeDeLivros }} {{ relatorio.quantidadeDeLivros == 1 ? 'livro' : 'livros' }}</th>
+            <th class="text-end text-nowrap">{{ relatorio.total|format_currency('BRL') }}</th>
+        </tr>
+    </table>
+    <p class="small text-body-secondary">
+        Um livro com mais de um autor aparece sob cada um deles e entra no subtotal de cada autor.
+        No total geral, cada livro é contado uma vez só.
+    </p>
+{% endif %}

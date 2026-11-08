@@ -1,12 +1,6 @@
 @import "variaveis";
-
-// O Bootstrap 5.3 ainda é distribuído para @import (o @use com configuração entra no Bootstrap 6).
-// Os avisos de deprecação do Sass sobre isso estão silenciados no webpack.config.js.
 @import "bootstrap/scss/bootstrap";
 
-// Componentes do projeto, também com as variáveis próprias
-
-// Caixas de seleção de autores e assuntos: rolam dentro de uma altura fixa em vez de alongar a página.
 .lista-opcoes {
     max-height: $altura-max-lista-opcoes;
     overflow-y: auto;
@@ -23,6 +17,26 @@
         letter-spacing: 0.03em;
         color: $cor-secundaria;
         white-space: nowrap;
+    }
+}
+
+// Relatório: faixa com o nome do autor sobre a tabela dos livros dele.
+.cabecalho-autor {
+    margin: 0;
+    padding: $espaco-base * 0.5 $espaco-base * 0.75;
+    font-size: $tamanho-fonte-base * 1.1;
+    color: $white;
+    background-color: $cor-primaria;
+    border-radius: $raio-borda $raio-borda 0 0;
+}
+
+.tabela-relatorio {
+    table-layout: fixed;
+    min-width: 40rem;
+
+    tfoot td {
+        font-weight: 600;
+        background-color: $cor-fundo;
     }
 }
 
