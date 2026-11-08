@@ -42,3 +42,17 @@ services:
       - "5432"
 ###< doctrine/doctrine-bundle ###
 
+  # Compila o front-end com o Encore (ADR 0015). Não sobe com "docker compose up": roda sob demanda,
+  # com "docker compose run --rm node npm ...". Mesma versão fixada do estágio assets_builder do Dockerfile.
+  node:
+    image: node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
+    profiles: [tools]
+    working_dir: /app
+    volumes:
+      - ./:/app
+      # node_modules num volume, fora do bind mount: mais rápido no Mac/Windows e não aparece no host.
+      - node_modules:/app/node_modules
+
+volumes:
+  node_modules:
+

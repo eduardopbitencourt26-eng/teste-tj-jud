@@ -25,6 +25,11 @@ final class LivroService
         return $this->livroRepository->listarComAutoresEAssuntos();
     }
 
+    public function contar(): int
+    {
+        return $this->livroRepository->count();
+    }
+
     /**
      * Livro é o lado dono das duas relações: o flush grava também livro_autor e livro_assunto.
      */

@@ -89,6 +89,19 @@ COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--watch" ]
 
+# Front-end: compila os assets com o Encore. Só o resultado (public/build) vai para a imagem de produção,
+# que não tem Node (ADR 0015). Mesma versão fixada do serviço "node" do compose.override.yaml.
+FROM node:24.22.2-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8 AS assets_builder
+
+WORKDIR /app
+
+COPY --link package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY --link webpack.config.js ./
+COPY --link assets assets/
+RUN npm run build
+
 # Builder for the prod FrankenPHP image
 FROM frankenphp_base AS frankenphp_prod_builder
 
@@ -107,15 +120,13 @@ RUN composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scri
 
 # copy sources
 COPY --link --exclude=frankenphp/ . ./
+COPY --link --from=assets_builder /app/public/build public/build/
 
 RUN <<-EOF
 	mkdir -p var/cache var/log var/share
 	composer dump-autoload --classmap-authoritative --no-dev
 	composer dump-env prod
 	composer run-script --no-dev post-install-cmd
-	if [ -f importmap.php ]; then
-		php bin/console asset-map:compile
-	fi
 	chmod +x bin/console
 	chmod -R g=u var
 	sync

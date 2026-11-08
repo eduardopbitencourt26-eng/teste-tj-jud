@@ -25,6 +25,11 @@ final class AutorService
         return $this->autorRepository->findBy([], ['nome' => 'ASC']);
     }
 
+    public function contar(): int
+    {
+        return $this->autorRepository->count();
+    }
+
     public function salvar(Autor $autor): void
     {
         $this->entityManager->persist($autor);

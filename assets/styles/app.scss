@@ -1,0 +1,42 @@
+@import "variaveis";
+
+// O Bootstrap 5.3 ainda é distribuído para @import (o @use com configuração entra no Bootstrap 6).
+// Os avisos de deprecação do Sass sobre isso estão silenciados no webpack.config.js.
+@import "bootstrap/scss/bootstrap";
+
+// Componentes do projeto, também com as variáveis próprias
+
+// Caixas de seleção de autores e assuntos: rolam dentro de uma altura fixa em vez de alongar a página.
+.lista-opcoes {
+    max-height: $altura-max-lista-opcoes;
+    overflow-y: auto;
+    padding: $espaco-base * 0.5 $espaco-base * 0.75;
+    background-color: $white;
+    border: $border-width solid $cor-borda;
+    border-radius: $raio-borda;
+}
+
+.tabela-cadastro {
+    thead th {
+        font-size: $tamanho-fonte-pequena;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: $cor-secundaria;
+        white-space: nowrap;
+    }
+}
+
+.cartao-inicio {
+    transition: box-shadow 0.15s ease-in-out;
+
+    &:hover,
+    &:focus-within {
+        box-shadow: $box-shadow;
+    }
+
+    .contagem {
+        font-size: $tamanho-titulo * 1.25;
+        font-weight: 600;
+        color: $cor-primaria;
+    }
+}

@@ -6,7 +6,15 @@
     <h1 class="h3 mb-3">{{ titulo }}</h1>
 
     {{ form_start(form) }}
-        {{ form_widget(form) }}
+        <div class="row">
+            <div class="col-12 col-md-6">{{ form_row(form.titulo) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.editora) }}</div>
+            <div class="col-6 col-md-2">{{ form_row(form.edicao) }}</div>
+            <div class="col-6 col-md-3">{{ form_row(form.anoPublicacao) }}</div>
+            <div class="col-12 col-md-4">{{ form_row(form.valor) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.autores, {attr: {class: 'lista-opcoes'}}) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.assuntos, {attr: {class: 'lista-opcoes'}}) }}</div>
+        </div>
         {{ include('_form_actions.html.twig', {voltar_url: path('livro_listar')}) }}
     {{ form_end(form) }}
 {% endblock %}

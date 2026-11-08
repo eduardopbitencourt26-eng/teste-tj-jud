@@ -23,7 +23,7 @@ Os motivos de cada escolha estão nos [ADRs](#decisões-de-arquitetura-adrs).
 - Portas **80** e **443** livres no host. Se estiverem ocupadas, veja [Trocar portas](#trocar-portas-ocupadas).
 - Opcional: `make`, para usar os atalhos do `Makefile`. Todos os atalhos têm o comando equivalente abaixo.
 
-Não é preciso instalar PHP, Composer nem PostgreSQL: tudo roda em containers.
+Não é preciso instalar PHP, Composer, Node nem PostgreSQL: tudo roda em containers.
 
 ## Instalação do zero
 
@@ -34,6 +34,9 @@ cd livros
 docker compose build --pull --no-cache
 docker compose up --wait
 docker compose exec php composer install --no-interaction
+docker compose run --rm node npm ci --no-audit --no-fund
+docker compose run --rm node npm run dev
+docker compose restart php
 docker compose exec php bin/console doctrine:database:create --if-not-exists
 docker compose exec php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 ```
@@ -90,7 +93,9 @@ aleatória, para não conflitar com um PostgreSQL local. Para ver qual foi: `doc
 | `make console c="about"` | `docker compose exec php bin/console about` | Roda um comando do Symfony |
 | `make reset-db` | ver `Makefile` | Apaga e recria o banco de desenvolvimento |
 | `make sql-export` | `docker compose exec -T php sh bin/sql-export` | Regenera os scripts de `database/` a partir das migrations |
-| `make build-assets` | `docker compose exec php bin/console asset-map:compile` | Compila os assets *(muda na etapa de front-end)* |
+| `make assets` | `docker compose run --rm node npm ci` e `npm run dev`, depois `docker compose restart php` | Instala as dependências do front-end e compila os assets |
+| `make watch` | `docker compose run --rm node npm run watch` | Recompila os assets a cada alteração em `assets/` |
+| `make build-assets` | `docker compose run --rm node npm run build`, depois `docker compose restart php` | Compila os assets minificados, como em produção |
 
 `make` não vem instalado no Windows. Opções: rodar os comandos equivalentes, usar o WSL ou instalar com
 `winget install ezwinports.make`.
@@ -99,6 +104,29 @@ aleatória, para não conflitar com um PostgreSQL local. Para ver qual foi: `doc
 muda. No Docker Desktop do Windows, com o projeto numa pasta do Windows (`C:\...`), essas alterações não
 chegam ao container. Depois de editar PHP ou configuração, rode `docker compose restart php`. Templates Twig
 não precisam disso. Detalhes no [ADR 0011](docs/adr/0011-watch-do-worker-em-dev.md).
+
+## Front-end
+
+O CSS e o JS ficam em [`assets/`](assets/) e são compilados pelo **Webpack Encore** para `public/build/`
+(que não é versionado). O Node roda no serviço `node` do Docker Compose, que não sobe com o
+`docker compose up`: ele é usado sob demanda, com `docker compose run --rm node ...`
+([ADR 0015](docs/adr/0015-front-end-com-encore.md)).
+
+| Arquivo | O que tem |
+|---|---|
+| [`assets/styles/_variaveis.scss`](assets/styles/_variaveis.scss) | **Cores e tamanhos do projeto** (`$cor-primaria`, `$tamanho-fonte-base`, `$raio-borda`...), passadas para as variáveis do Bootstrap antes do import dele |
+| [`assets/styles/app.scss`](assets/styles/app.scss) | Importa as variáveis e o Bootstrap, e define os componentes próprios (lista de opções, tabela, cartões) |
+| [`assets/app.js`](assets/app.js) | Ponto de entrada: o SCSS e o plugin de colapso do Bootstrap (menu no celular) |
+| [`webpack.config.js`](webpack.config.js) | Configuração do Encore |
+
+Para mudar a cor principal, altere `$cor-primaria` e recompile (`make assets` ou `make watch`).
+
+O build é necessário só para ver o layout: os testes não dependem dele. Na imagem de produção, os assets são
+compilados num estágio do `Dockerfile` (`assets_builder`), e a imagem final não tem Node.
+
+Ao trocar entre o build de dev e o de produção, reinicie o php (`docker compose restart php`; os atalhos do
+`make` já fazem isso). Em modo worker, o servidor guarda em memória a lista de arquivos do build, e o build
+de produção muda os nomes (`app.3f2a1c.css`).
 
 ## Testes
 
@@ -183,3 +211,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0012 - Arquitetura em camadas](docs/adr/0012-arquitetura-em-camadas.md): Controller fino, Service com os casos de uso, Repository com as consultas.
 - [0013 - make:crud como ponto de partida](docs/adr/0013-make-crud-como-ponto-de-partida.md): o que mudou no código gerado e por quê.
 - [0014 - Formulário do livro](docs/adr/0014-formulario-do-livro.md): valor em R$ sem float, recusa de mais de 2 casas, autores e assuntos em caixas de seleção.
+- [0015 - Front-end com Webpack Encore](docs/adr/0015-front-end-com-encore.md): Encore no lugar do AssetMapper, Node no Compose, Bootstrap via SCSS com variáveis próprias, sem Stimulus e Turbo.

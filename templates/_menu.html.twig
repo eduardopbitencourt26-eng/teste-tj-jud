@@ -4,16 +4,22 @@
     {rotulo: 'Autores', rota: 'autor_listar', prefixo: 'autor_'},
     {rotulo: 'Assuntos', rota: 'assunto_listar', prefixo: 'assunto_'},
 ] %}
-<nav class="navbar navbar-expand bg-body-tertiary border-bottom">
+<nav class="navbar navbar-expand-md bg-primary" data-bs-theme="dark">
     <div class="container">
-        <span class="navbar-brand">Cadastro de Livros</span>
-        <ul class="navbar-nav">
-            {% for item in itens %}
-                {% set ativo = rota starts with item.prefixo %}
-                <li class="nav-item">
-                    <a href="{{ path(item.rota) }}" class="nav-link{{ ativo ? ' active' }}"{{ ativo ? ' aria-current="page"' }}>{{ item.rotulo }}</a>
-                </li>
-            {% endfor %}
-        </ul>
+        <a href="{{ path('inicio') }}" class="navbar-brand">Cadastro de Livros</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu-principal"
+                aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir o menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="menu-principal">
+            <ul class="navbar-nav ms-auto">
+                {% for item in itens %}
+                    {% set ativo = rota starts with item.prefixo %}
+                    <li class="nav-item">
+                        <a href="{{ path(item.rota) }}" class="nav-link{{ ativo ? ' active' }}"{{ ativo ? ' aria-current="page"' }}>{{ item.rotulo }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 </nav>

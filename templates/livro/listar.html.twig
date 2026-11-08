@@ -9,16 +9,16 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-striped align-middle">
+        <table class="table table-striped table-hover align-middle tabela-cadastro">
             <thead>
                 <tr>
-                    <th scope="col">Código</th>
+                    <th scope="col" class="d-none d-md-table-cell">Código</th>
                     <th scope="col">Título</th>
                     <th scope="col">Autores</th>
-                    <th scope="col">Assuntos</th>
-                    <th scope="col">Editora</th>
-                    <th scope="col" class="text-end">Edição</th>
-                    <th scope="col" class="text-end">Ano</th>
+                    <th scope="col" class="d-none d-lg-table-cell">Assuntos</th>
+                    <th scope="col" class="d-none d-lg-table-cell">Editora</th>
+                    <th scope="col" class="text-end d-none d-md-table-cell">Edição</th>
+                    <th scope="col" class="text-end d-none d-md-table-cell">Ano</th>
                     <th scope="col" class="text-end">Valor</th>
                     <th scope="col" class="text-end">Ações</th>
                 </tr>
@@ -26,13 +26,13 @@
             <tbody>
             {% for livro in livros %}
                 <tr>
-                    <td>{{ livro.codL }}</td>
+                    <td class="d-none d-md-table-cell">{{ livro.codL }}</td>
                     <td>{{ livro.titulo }}</td>
                     <td>{{ livro.autores|map(autor => autor.nome)|join(', ') }}</td>
-                    <td>{{ livro.assuntos|map(assunto => assunto.descricao)|join(', ')|default('—') }}</td>
-                    <td>{{ livro.editora }}</td>
-                    <td class="text-end">{{ livro.edicao }}ª</td>
-                    <td class="text-end">{{ livro.anoPublicacao }}</td>
+                    <td class="d-none d-lg-table-cell">{{ livro.assuntos|map(assunto => assunto.descricao)|join(', ')|default('—') }}</td>
+                    <td class="d-none d-lg-table-cell">{{ livro.editora }}</td>
+                    <td class="text-end d-none d-md-table-cell">{{ livro.edicao }}ª</td>
+                    <td class="text-end d-none d-md-table-cell">{{ livro.anoPublicacao }}</td>
                     <td class="text-end text-nowrap">{{ livro.valor|format_currency('BRL') }}</td>
                     <td class="text-end text-nowrap">
                         <a href="{{ path('livro_editar', {codL: livro.codL}) }}" class="btn btn-sm btn-outline-secondary">Editar</a>

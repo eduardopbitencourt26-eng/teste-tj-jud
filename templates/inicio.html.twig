@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1 class="mb-4">Cadastro de Livros</h1>
+
+    <div class="row g-3">
+        {% for cadastro in cadastros %}
+            <div class="col-12 col-md-4">
+                <div class="card cartao-inicio h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">
+                            <a href="{{ path(cadastro.rota) }}" class="stretched-link text-decoration-none">{{ cadastro.titulo }}</a>
+                        </h2>
+                        <p class="contagem mb-0">{{ cadastro.quantidade }}</p>
+                        <p class="text-body-secondary mb-0">{{ cadastro.quantidade == 1 ? 'registro' : 'registros' }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -16,7 +16,7 @@ de segurança até 11/2029 (confirmado com `bin/console about`). O Symfony 8.0 �
 ### Ambiente 100% Docker com o template oficial symfony-docker
 O projeto parte do [symfony-docker](https://github.com/dunglas/symfony-docker), template mantido por
 Kévin Dunglas (core team do Symfony) e indicado na documentação oficial "Using Docker with Symfony".
-O avaliador só precisa de Docker: PHP, Composer, PostgreSQL e (mais adiante) Node rodam em containers.
+O avaliador só precisa de Docker: PHP, Composer, PostgreSQL e Node rodam em containers (Node: ADR 0015).
 Todo comando roda com `docker compose exec php ...`.
 
 ### FrankenPHP no lugar de nginx + php-fpm

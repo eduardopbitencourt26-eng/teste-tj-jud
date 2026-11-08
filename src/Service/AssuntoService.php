@@ -26,6 +26,11 @@ final class AssuntoService
         return $this->assuntoRepository->findBy([], ['descricao' => 'ASC']);
     }
 
+    public function contar(): int
+    {
+        return $this->assuntoRepository->count();
+    }
+
     /**
      * Serve para cadastro e edição: persist() de um objeto já gerenciado não faz nada.
      */

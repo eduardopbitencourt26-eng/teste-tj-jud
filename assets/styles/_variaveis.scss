@@ -1,0 +1,48 @@
+// Variáveis próprias do projeto: cores e tamanhos ficam aqui, num lugar só.
+// Elas alimentam as variáveis do Bootstrap (abaixo), que precisam ser definidas ANTES do import dele:
+// no Bootstrap toda variável é "!default", ou seja, só assume o valor padrão se ainda não existir.
+
+// Cores
+$cor-primaria: #1f5f7a;
+$cor-secundaria: #5c6b77;
+$cor-sucesso: #2e7d4f;
+$cor-perigo: #b3261e;
+$cor-fundo: #f4f6f8;
+$cor-texto: #1e2a32;
+$cor-borda: #d5dce2;
+
+// Tamanhos
+$tamanho-fonte-base: 1rem;
+$tamanho-fonte-pequena: 0.875rem;
+$tamanho-titulo: 1.75rem;
+$raio-borda: 0.5rem;
+$espaco-base: 1rem;
+$altura-max-lista-opcoes: 12rem;
+
+// Mapeamento para o Bootstrap
+$primary: $cor-primaria;
+$secondary: $cor-secundaria;
+$success: $cor-sucesso;
+$danger: $cor-perigo;
+$body-bg: $cor-fundo;
+$body-color: $cor-texto;
+$border-color: $cor-borda;
+
+$font-size-base: $tamanho-fonte-base;
+$font-size-sm: $tamanho-fonte-pequena;
+$h1-font-size: $tamanho-titulo;
+$headings-font-weight: 600;
+
+$spacer: $espaco-base;
+$border-radius: $raio-borda;
+$border-radius-sm: $raio-borda * 0.75;
+$border-radius-lg: $raio-borda * 1.25;
+
+$btn-padding-y: 0.5rem;
+$btn-padding-x: 1rem;
+$btn-font-weight: 500;
+$input-padding-y: 0.55rem;
+$table-cell-padding-y: 0.65rem;
+$table-bg: #fff;
+$card-bg: #fff;
+$navbar-brand-font-size: 1.25rem;

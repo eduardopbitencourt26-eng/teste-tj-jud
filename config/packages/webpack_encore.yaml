@@ -1,0 +1,19 @@
+webpack_encore:
+    # Onde o Encore grava o build: o mesmo caminho de Encore.setOutputPath() no webpack.config.js
+    output_path: '%kernel.project_dir%/public/build'
+    script_attributes:
+        defer: true
+
+framework:
+    assets:
+        json_manifest_path: '%kernel.project_dir%/public/build/manifest.json'
+
+when@prod:
+    webpack_encore:
+        # Guarda o entrypoints.json no cache do Symfony: o build só muda junto com uma imagem nova.
+        cache: true
+
+# Os testes não dependem do build do front-end: sem o entrypoints.json, as tags de CSS e JS saem vazias.
+when@test:
+    webpack_encore:
+        strict_mode: false

@@ -23,8 +23,8 @@ O `config/packages/messenger.yaml` foi apagado manualmente, porque pertence à r
 Ficam:
 - **`symfony/security-bundle`**: base para proteção CSRF dos formulários e da exclusão, e para autenticação,
   se for necessária.
-- **`symfony/ux-turbo`** e **`symfony/stimulus-bundle`**: saem na Fase 6, junto com a troca de AssetMapper
-  por Webpack Encore, para tratar todo o front-end numa decisão só.
+- **`symfony/ux-turbo`** e **`symfony/stimulus-bundle`**: ficaram até a etapa de front-end, quando saíram junto com a troca de AssetMapper
+  por Webpack Encore, para tratar todo o front-end numa decisão só (ADR 0015).
 
 ## Alternativas consideradas
 - **Manter os pacotes e só não usá-los** — mais simples agora, mas a migration da Fase 1 traria uma tabela
