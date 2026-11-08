@@ -54,8 +54,14 @@ autoincremento, preferida no PostgreSQL moderno em vez de `SERIAL` (configurada 
 | `livro_assunto.assunto_codas` → `assunto` | nenhum (`NO ACTION`) | o banco **bloqueia** excluir um assunto que ainda tem livros |
 
 O vínculo pertence ao livro: ao excluir o livro, os vínculos perdem o sentido. Já excluir um autor
-silenciosamente "tiraria" esse autor de livros cadastrados. A regra de negócio da Fase 4 verifica isso antes e
-mostra uma mensagem clara; a FK é a rede de segurança caso a verificação falhe ou alguém exclua direto no banco.
+silenciosamente "tiraria" esse autor de livros cadastrados.
+
+**Correção (Fase 4):** o bloqueio pela FK vale para SQL direto, mas **não para exclusões feitas pelo
+Doctrine**. Ao remover um `Autor` ou um `Assunto` (lado inverso da relação), o Doctrine apaga antes os
+vínculos dele em `livro_autor`/`livro_assunto` e só depois a linha da entidade, e a FK nunca chega a barrar.
+O teste de integração da Fase 4 mostrou isso: a exclusão passava sem erro e o livro ficava sem o autor. Por
+isso a regra de negócio no Service é a proteção principal, e a FK protege contra exclusões por fora da
+aplicação e contra a corrida entre a verificação e o DELETE (ADR 0016).
 
 ## Alternativas consideradas
 - **Sem PK nas associativas (só as FKs com índice, literalmente como no modelo)** — permite vínculos duplicados,
@@ -69,8 +75,9 @@ mostra uma mensagem clara; a FK é a rede de segurança caso a verificação fal
 - **`SERIAL`** — funciona, mas é uma extensão do PostgreSQL. `IDENTITY` é padrão SQL e é o padrão atual do Doctrine.
 
 ## Consequências
-- Tentar excluir um autor ou assunto com livros gera `ForeignKeyConstraintViolationException` no Doctrine DBAL.
-  A Fase 4 trata essa exceção especificamente e, antes dela, faz a verificação de regra de negócio.
+- Excluir um autor ou assunto com livros por SQL direto gera erro de FK. Pelo Doctrine, os vínculos seriam
+  apagados antes; a verificação no Service impede isso, e a `ForeignKeyConstraintViolationException` só
+  aparece na corrida descrita acima (ADR 0016).
 - O lado "dono" das relações no Doctrine é `Livro` (`Livro::$autores` e `Livro::$assuntos`). Só alterações
   nessas coleções gravam em `livro_autor`/`livro_assunto`; os métodos `addAutor()`/`removeAutor()` mantêm os
   dois lados sincronizados em memória.

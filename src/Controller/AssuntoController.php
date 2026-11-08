@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Assunto;
+use App\Exception\AssuntoPossuiLivrosException;
 use App\Form\AssuntoType;
 use App\Service\AssuntoService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,8 +51,12 @@ final class AssuntoController extends AbstractController
             return $this->redirectToRoute('assunto_listar', status: Response::HTTP_SEE_OTHER);
         }
 
-        $this->assuntoService->excluir($assunto);
-        $this->addFlash('success', 'Assunto excluído com sucesso.');
+        try {
+            $this->assuntoService->excluir($assunto);
+            $this->addFlash('success', 'Assunto excluído com sucesso.');
+        } catch (AssuntoPossuiLivrosException $excecao) {
+            $this->addFlash('danger', $excecao->getMessage());
+        }
 
         return $this->redirectToRoute('assunto_listar', status: Response::HTTP_SEE_OTHER);
     }

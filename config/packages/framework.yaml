@@ -5,6 +5,13 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    # Banco fora do ar: 503 (indisponível, tente de novo) em vez de 500, e log "critical" (ADR 0016).
+    # Tratado aqui, num lugar só, porque qualquer requisição pode encontrar o banco fora do ar.
+    exceptions:
+        Doctrine\DBAL\Exception\ConnectionException:
+            log_level: critical
+            status_code: 503
+
     #esi: true
     #fragments: true
 

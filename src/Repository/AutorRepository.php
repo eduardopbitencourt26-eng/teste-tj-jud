@@ -15,4 +15,15 @@ class AutorRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Autor::class);
     }
+
+    /**
+     * COUNT no banco, sem carregar os livros na memória.
+     */
+    public function contarLivros(Autor $autor): int
+    {
+        return (int) $this->getEntityManager()
+            ->createQuery('SELECT COUNT(l.codL) FROM App\Entity\Livro l JOIN l.autores au WHERE au = :autor')
+            ->setParameter('autor', $autor)
+            ->getSingleScalarResult();
+    }
 }

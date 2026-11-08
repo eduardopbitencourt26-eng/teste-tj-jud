@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Autor;
+use App\Exception\AutorPossuiLivrosException;
 use App\Form\AutorType;
 use App\Service\AutorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -47,8 +48,12 @@ final class AutorController extends AbstractController
             return $this->redirectToRoute('autor_listar', status: Response::HTTP_SEE_OTHER);
         }
 
-        $this->autorService->excluir($autor);
-        $this->addFlash('success', 'Autor excluído com sucesso.');
+        try {
+            $this->autorService->excluir($autor);
+            $this->addFlash('success', 'Autor excluído com sucesso.');
+        } catch (AutorPossuiLivrosException $excecao) {
+            $this->addFlash('danger', $excecao->getMessage());
+        }
 
         return $this->redirectToRoute('autor_listar', status: Response::HTTP_SEE_OTHER);
     }

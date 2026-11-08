@@ -51,8 +51,8 @@ class Livro
     private ?string $valor = null;
 
     /**
-     * Excluir o livro apaga seus vínculos (CASCADE); excluir um autor que ainda tem livros
-     * é bloqueado pela chave estrangeira.
+     * Excluir o livro apaga seus vínculos (CASCADE). Excluir um autor que ainda tem livros é bloqueado
+     * pelo AutorService: pelo Doctrine, os vínculos seriam apagados antes e a chave estrangeira não barraria.
      *
      * @var Collection<int, Autor>
      */

@@ -147,6 +147,7 @@ A suíte é uma amostra enxuta: TDD nas regras de negócio críticas, cobrindo o
 |---|---|---|
 | Validação do livro | Unitário | [`tests/Unit/Entity/LivroValidacaoTest.php`](tests/Unit/Entity/LivroValidacaoTest.php) |
 | Listagem de livros e cadastro com 2 autores | Funcional | [`tests/Functional/LivroControllerTest.php`](tests/Functional/LivroControllerTest.php) |
+| Exclusão de autor com livros é bloqueada | Integração | [`tests/Integration/Service/AutorServiceTest.php`](tests/Integration/Service/AutorServiceTest.php) |
 
 Cada teste roda numa transação desfeita ao final (`dama/doctrine-test-bundle`), então o banco de teste
 não acumula dados entre execuções.
@@ -212,3 +213,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0013 - make:crud como ponto de partida](docs/adr/0013-make-crud-como-ponto-de-partida.md): o que mudou no código gerado e por quê.
 - [0014 - Formulário do livro](docs/adr/0014-formulario-do-livro.md): valor em R$ sem float, recusa de mais de 2 casas, autores e assuntos em caixas de seleção.
 - [0015 - Front-end com Webpack Encore](docs/adr/0015-front-end-com-encore.md): Encore no lugar do AssetMapper, Node no Compose, Bootstrap via SCSS com variáveis próprias, sem Stimulus e Turbo.
+- [0016 - Tratamento de erros](docs/adr/0016-tratamento-de-erros.md): exceções de domínio, rede de segurança da chave estrangeira, banco fora do ar e páginas de erro.
