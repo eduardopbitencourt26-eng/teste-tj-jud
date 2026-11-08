@@ -9,7 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Sem o campo "livros": o vínculo com livros é editado pelo formulário do livro, que é o lado dono da relação.
+ * sem o campo 'livros': o vínculo com livros é editado pelo formulário do livro, que é o lado dono da relação.
  */
 final class AssuntoType extends AbstractType
 {

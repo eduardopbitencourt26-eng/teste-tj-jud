@@ -9,9 +9,6 @@ use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Casos de uso de Autor. Mesmo molde do AssuntoService (ADR 0012).
- */
 final class AutorService
 {
     public function __construct(
@@ -41,9 +38,6 @@ final class AutorService
     }
 
     /**
-     * Autor é o lado inverso da relação: ao removê-lo, o Doctrine apaga antes os vínculos em livro_autor, e a
-     * chave estrangeira nunca chega a barrar. Por isso a regra é verificada aqui, antes do remove().
-     *
      * @throws AutorPossuiLivrosException
      */
     public function excluir(Autor $autor): void
@@ -57,8 +51,7 @@ final class AutorService
             $this->entityManager->remove($autor);
             $this->entityManager->flush();
         } catch (ForeignKeyConstraintViolationException $excecao) {
-            // Um livro foi vinculado entre a contagem e o DELETE. O EntityManager fica fechado depois de um
-            // erro de banco; quem chamou só deve mostrar a mensagem e encerrar a requisição.
+            // Um livro foi vinculado entre a contagem e o DELETE. O EntityManager fica fechado depois de um erro de banco
             $this->logger->warning('Exclusão de autor barrada pela chave estrangeira.', [
                 'codAu' => $autor->getCodAu(),
                 'erro' => $excecao->getMessage(),

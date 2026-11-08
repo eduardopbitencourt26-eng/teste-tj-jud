@@ -62,7 +62,7 @@ final class AssuntoController extends AbstractController
     }
 
     /**
-     * Fluxo comum de cadastro e edição. Formulário inválido volta renderizado com os erros (status 422).
+     * Fluxo de cadastro e edição. Formulário inválido volta renderizado com os erros (status 422).
      */
     private function formulario(Request $request, Assunto $assunto, string $titulo, string $mensagemSucesso): Response
     {

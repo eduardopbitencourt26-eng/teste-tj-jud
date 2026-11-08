@@ -29,6 +29,11 @@ services:
       # See https://xdebug.org/docs/all_settings#mode
       XDEBUG_MODE: "${XDEBUG_MODE:-develop}"
       APP_ENV: "${APP_ENV:-dev}"
+    # Na primeira subida o entrypoint roda o composer install (vendor/ vazio), que no Mac/Windows passa dos
+    # 60 s de tolerância da imagem e fazia o "up --wait" acusar unhealthy. O teste continua o da imagem.
+    healthcheck:
+      start_period: 15m
+      start_interval: 5s
     extra_hosts:
       # Ensure that host.docker.internal is correctly defined on Linux
       - host.docker.internal:host-gateway

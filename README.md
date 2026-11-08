@@ -2,8 +2,6 @@
 
 Teste técnico: CRUD de Livros, Autores e Assuntos com relatório agrupado por autor, em Symfony 7.4 LTS.
 
-> Documento em construção: as seções marcadas como *(em construção)* são completadas nas próximas etapas.
-
 ## Stack
 
 | Camada | Tecnologia |
@@ -39,12 +37,19 @@ docker compose run --rm node npm run dev
 docker compose restart php
 docker compose exec php bin/console doctrine:database:create --if-not-exists
 docker compose exec php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+docker compose exec php bin/console doctrine:fixtures:load --no-interaction
 ```
 
-Com `make`, os mesmos passos são `make setup`.
+Com `make`, os mesmos passos são `make setup`. O último comando carrega os [dados de exemplo](#dados-de-exemplo)
+e **apaga o que já existir no banco de desenvolvimento**. Para começar com o banco vazio, pule-o.
 
 Depois, acesse **https://localhost**. O certificado é gerado por uma autoridade certificadora local do
 Caddy, então o navegador mostra um aviso na primeira vez: aceite a exceção.
+
+**A primeira subida é lenta:** o `docker compose up --wait` instala as dependências do Composer dentro do
+container antes de ficar pronto. No Windows e no Mac, com o projeto montado do disco do host, isso pode
+passar de 10 minutos (medido no Windows: cerca de 10 minutos); no Linux é bem mais rápido. As subidas seguintes levam segundos. A primeira requisição
+também leva alguns segundos, porque o Symfony monta o cache.
 
 Para parar: `docker compose down` (mantém os dados). Para apagar também o banco: `docker compose down -v`.
 
@@ -92,6 +97,7 @@ aleatória, para não conflitar com um PostgreSQL local. Para ver qual foi: `doc
 | `make sh` | `docker compose exec php bash` | Shell dentro do container PHP |
 | `make console c="about"` | `docker compose exec php bin/console about` | Roda um comando do Symfony |
 | `make reset-db` | ver `Makefile` | Apaga e recria o banco de desenvolvimento |
+| `make fixtures` | `docker compose exec php bin/console doctrine:fixtures:load --no-interaction` | Apaga os dados e carrega os dados de exemplo |
 | `make sql-export` | `docker compose exec -T php sh bin/sql-export` | Regenera os scripts de `database/` a partir das migrations |
 | `make assets` | `docker compose run --rm node npm ci` e `npm run dev`, depois `docker compose restart php` | Instala as dependências do front-end e compila os assets |
 | `make watch` | `docker compose run --rm node npm run watch` | Recompila os assets a cada alteração em `assets/` |
@@ -137,7 +143,7 @@ docker compose exec php bin/phpunit
 ```
 
 Com `make`: `make test`. Os testes usam um banco separado (`app_test`), então não alteram os dados de
-desenvolvimento.
+desenvolvimento. Para ver cada teste descrito em frases: `docker compose exec php bin/phpunit --testdox`.
 
 A suíte é uma amostra enxuta: TDD nas regras de negócio críticas, cobrindo os três tipos de teste
 (unitário, integração e funcional). O plano completo está no
@@ -164,24 +170,48 @@ Os dados vêm só da view `vw_livros_por_autor` ([ADR 0018](docs/adr/0018-view-d
 por autor × livro, com os assuntos agregados. Um livro com mais de um autor aparece sob cada autor e entra no
 subtotal de cada um; no total geral, cada livro é contado uma vez só.
 
+## Dados de exemplo
+
+O [`database/03_carga_inicial.sql`](database/03_carga_inicial.sql) é a fonte única dos dados de exemplo. A
+fixture [`CargaInicialFixtures`](src/DataFixtures/CargaInicialFixtures.php) executa esse mesmo arquivo, então
+carregar pelo Doctrine (`make fixtures`) ou pelo `psql` dá o mesmo resultado
+([ADR 0019](docs/adr/0019-dados-de-exemplo.md)).
+
+São 7 autores, 7 assuntos e 7 livros, escolhidos para exercitar o relatório:
+
+| Caso | Exemplo |
+|---|---|
+| Livro com 2 autores (aparece sob cada um) | *Belas Maldições* (Neil Gaiman e Terry Pratchett), *Refatoração* (Martin Fowler e Kent Beck) |
+| Livro com vários assuntos | *Dom Casmurro*: Clássico, Literatura nacional, Romance |
+| Livro sem assunto | *A Hora da Estrela* |
+| Autor e assunto sem livros (podem ser excluídos; fora do relatório) | Cecília Meireles; Poesia |
+| Autor com livros (a exclusão é bloqueada) | Qualquer outro autor |
+
+Com esses dados, o relatório mostra 6 autores e **total geral de 7 livros, R$ 412,50**. A soma dos subtotais
+daria R$ 586,40, porque os dois livros com 2 autores entrariam duas vezes.
+
 ## Scripts SQL
 
 A pasta [`database/`](database/) tem scripts SQL puros, para criar o banco sem o Doctrine (por exemplo,
-quando um DBA aplica o esquema). **Eles são gerados a partir das migrations, não escritos à mão:** as
-entidades e as migrations são a fonte única da verdade
-([ADR 0008](docs/adr/0008-scripts-sql-gerados-das-migrations.md)).
+quando um DBA aplica o esquema). **Os scripts do esquema são gerados a partir das migrations, não escritos à
+mão:** as entidades e as migrations são a fonte única da verdade
+([ADR 0008](docs/adr/0008-scripts-sql-gerados-das-migrations.md)). A carga inicial é a exceção: não vem de
+migration, e é a fonte dos dados de exemplo ([ADR 0019](docs/adr/0019-dados-de-exemplo.md)).
 
-| Script | Conteúdo | Gerado de |
+| Script | Conteúdo | Origem |
 |---|---|---|
-| [`01_create_tables.sql`](database/01_create_tables.sql) | Tabelas `livro`, `autor`, `assunto`, `livro_autor` e `livro_assunto` | `migrations/Version20261107185619.php` |
-| [`02_view_relatorio.sql`](database/02_view_relatorio.sql) | View `vw_livros_por_autor`, usada pelo relatório | `migrations/Version20261107233000.php` |
-| `03_carga_inicial.sql` | *(em construção)* Dados de exemplo | |
+| [`01_create_tables.sql`](database/01_create_tables.sql) | Tabelas `livro`, `autor`, `assunto`, `livro_autor` e `livro_assunto` | Gerado de `migrations/Version20261107185619.php` |
+| [`02_view_relatorio.sql`](database/02_view_relatorio.sql) | View `vw_livros_por_autor`, usada pelo relatório | Gerado de `migrations/Version20261107233000.php` |
+| [`03_carga_inicial.sql`](database/03_carga_inicial.sql) | Dados de exemplo | Escrito à mão; também usado pelas fixtures |
 
-Para aplicar, em ordem, num banco vazio (`-1` roda cada script numa transação só):
+Para aplicar, em ordem, num banco vazio (`-1` roda cada script numa transação só). O exemplo cria um banco
+`livros` separado, para não misturar com o `app` da aplicação:
 
 ```bash
-docker compose exec -T database psql -U app -d app -1 -v ON_ERROR_STOP=1 < database/01_create_tables.sql
-docker compose exec -T database psql -U app -d app -1 -v ON_ERROR_STOP=1 < database/02_view_relatorio.sql
+docker compose exec database createdb -U app livros
+docker compose exec -T database psql -U app -d livros -1 -v ON_ERROR_STOP=1 < database/01_create_tables.sql
+docker compose exec -T database psql -U app -d livros -1 -v ON_ERROR_STOP=1 < database/02_view_relatorio.sql
+docker compose exec -T database psql -U app -d livros -1 -v ON_ERROR_STOP=1 < database/03_carga_inicial.sql
 ```
 
 Use **ou** os scripts **ou** as migrations no mesmo banco, não os dois: as tabelas já existiriam.
@@ -205,7 +235,58 @@ nas migrations produz arquivos idênticos.
 
 ## Estrutura do projeto
 
-*(em construção)*
+O código segue três camadas: o Controller trata o HTTP, o Service executa os casos de uso (é o único que
+grava) e o Repository faz as consultas ([ADR 0012](docs/adr/0012-arquitetura-em-camadas.md)).
+
+```
+assets/                 SCSS (variáveis de cor e tamanho) e JS, compilados pelo Encore
+config/                 Configuração do Symfony (packages/, routes, services)
+database/               Scripts SQL: esquema e view (gerados) e dados de exemplo
+docs/adr/               Decisões de arquitetura
+frankenphp/             Caddyfile, php.ini e entrypoint do container
+migrations/             Migrations do Doctrine: tabelas e view do relatório
+src/
+  Controller/           Rotas e fluxo HTTP: Inicio, Livro, Autor, Assunto, Relatorio
+  DataFixtures/         Fixture que executa database/03_carga_inicial.sql
+  Entity/               Livro, Autor e Assunto, com o mapeamento e as regras de validação
+  Exception/            Exceções de domínio (exclusão de autor ou assunto com livros)
+  Form/                 Formulários dos três cadastros
+  Relatorio/            Objetos do relatório (grupo por autor, totais)
+  Repository/           Consultas (o RelatorioRepository lê só a view)
+  Service/              Casos de uso, geração do relatório e do PDF
+templates/              Twig: base, menu, partials, telas de cada cadastro, relatório e páginas de erro
+tests/
+  Unit/                 Validação do livro
+  Integration/          Exclusão de autor com livros; view do relatório
+  Functional/           Cadastro de livro pelo formulário; resposta em PDF
+```
+
+## Implantação em produção
+
+O `Dockerfile` tem um estágio de produção (`frankenphp_prod`): dependências sem as de desenvolvimento,
+autoloader otimizado, assets compilados e minificados no estágio `assets_builder` (a imagem final não tem
+Node) e o `php.ini` de produção. Os segredos vêm do ambiente, nunca do repositório:
+
+```bash
+APP_SECRET=$(openssl rand -hex 32) \
+CADDY_MERCURE_JWT_SECRET=$(openssl rand -hex 32) \
+POSTGRES_PASSWORD='<senha-forte>' \
+SERVER_NAME=livros.exemplo.gov.br \
+docker compose -f compose.yaml -f compose.prod.yaml build --pull
+# (mesmas variáveis)
+docker compose -f compose.yaml -f compose.prod.yaml up --wait
+docker compose -f compose.yaml -f compose.prod.yaml exec php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+Em produção, o entrypoint do container já roda as migrations pendentes ao subir; o último comando é o
+caminho explícito. As fixtures não existem na imagem de produção (pacote de desenvolvimento): para dados de
+exemplo, use o `03_carga_inicial.sql`. Com `SERVER_NAME` apontando para um domínio real, o Caddy obtém o
+certificado HTTPS sozinho.
+
+Para testar a imagem de produção na mesma máquina do desenvolvimento, use um nome de projeto separado
+(`docker compose -p livros-prod -f compose.yaml -f compose.prod.yaml ...`). Sem isso, ela reaproveita o volume
+`caddy_data` criado pelo container de dev (que roda como root), e o Caddy de produção, que roda como
+`www-data`, não consegue ler os certificados.
 
 ## Decisões de arquitetura (ADRs)
 
@@ -229,3 +310,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0016 - Tratamento de erros](docs/adr/0016-tratamento-de-erros.md): exceções de domínio, rede de segurança da chave estrangeira, banco fora do ar e páginas de erro.
 - [0017 - Dompdf como componente de relatório](docs/adr/0017-dompdf-como-componente-de-relatorio.md): template Twig convertido em PDF, sem acesso remoto, fuso de Brasília.
 - [0018 - Desenho da view do relatório](docs/adr/0018-view-do-relatorio.md): uma linha por autor × livro, `LEFT JOIN` em assuntos, total geral sem contar livros em dobro.
+- [0019 - Dados de exemplo num script SQL único](docs/adr/0019-dados-de-exemplo.md): a fixture executa o `03_carga_inicial.sql`.

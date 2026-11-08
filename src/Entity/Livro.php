@@ -38,10 +38,6 @@ class Livro
     #[Assert\Regex(pattern: '/^\d{4}$/', message: 'O ano de publicação deve ter 4 dígitos, como 1999.')]
     private ?string $anoPublicacao = null;
 
-    /**
-     * DECIMAL chega ao PHP como string ("1234.56") para não perder precisão em float.
-     * O Regex espelha DECIMAL(10,2): sem sinal (não negativo), até 8 dígitos inteiros e até 2 casas.
-     */
     #[ORM\Column(name: 'valor', type: Types::DECIMAL, precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'Informe o valor.')]
     #[Assert\Regex(
@@ -51,9 +47,6 @@ class Livro
     private ?string $valor = null;
 
     /**
-     * Excluir o livro apaga seus vínculos (CASCADE). Excluir um autor que ainda tem livros é bloqueado
-     * pelo AutorService: pelo Doctrine, os vínculos seriam apagados antes e a chave estrangeira não barraria.
-     *
      * @var Collection<int, Autor>
      */
     #[ORM\ManyToMany(targetEntity: Autor::class, inversedBy: 'livros')]

@@ -18,9 +18,6 @@ class LivroRepository extends ServiceEntityRepository
     }
 
     /**
-     * Uma consulta só para a listagem: os JOINs com addSelect() já trazem autores e assuntos. Sem eles, cada
-     * livro dispararia mais duas consultas ao exibir as coleções (N+1).
-     *
      * @return array<Livro>
      */
     public function listarComAutoresEAssuntos(): array

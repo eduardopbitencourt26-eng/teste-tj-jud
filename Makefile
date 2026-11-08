@@ -6,7 +6,7 @@ CONSOLE        = $(PHP) bin/console
 NODE           = $(DOCKER_COMPOSE) run --rm node
 
 .DEFAULT_GOAL := help
-.PHONY: help build up down logs sh console setup test reset-db sql-export assets watch build-assets
+.PHONY: help build up down logs sh console setup fixtures test reset-db sql-export assets watch build-assets
 
 help: ## Lista os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-14s\033[0m %s\n", $$1, $$2}'
@@ -29,11 +29,15 @@ sh: ## Abre um shell no container php
 console: ## Roda um comando do Symfony: make console c="about"
 	$(CONSOLE) $(c)
 
-setup: build up ## Instalação do zero: imagens, containers, dependências, front-end e banco
+setup: build up ## Instalação do zero: imagens, containers, dependências, front-end, banco e dados de exemplo
 	$(PHP) composer install --no-interaction
 	$(MAKE) assets
 	$(CONSOLE) doctrine:database:create --if-not-exists
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction --allow-no-migration
+	$(CONSOLE) doctrine:fixtures:load --no-interaction
+
+fixtures: ## Apaga os dados do banco de desenvolvimento e carrega os dados de exemplo
+	$(CONSOLE) doctrine:fixtures:load --no-interaction
 
 test: ## Prepara o banco de teste e roda o PHPUnit
 	$(CONSOLE) --env=test doctrine:database:create --if-not-exists

@@ -1,4 +1,3 @@
-{# Mensagens gravadas com addFlash() no request anterior. O tipo vira a cor do alerta (success, danger). #}
 {% for tipo, mensagens in app.flashes %}
     {% for mensagem in mensagens %}
         <div class="alert alert-{{ tipo }}" role="alert">{{ mensagem }}</div>

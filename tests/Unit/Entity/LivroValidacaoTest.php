@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Validation;
 final class LivroValidacaoTest extends TestCase
 {
     /**
-     * Sem assunto de propósito: assunto é opcional
+     * Sem 'assunto': o campo assunto é opcional
      */
     private static function livroValido(): Livro
     {
@@ -45,8 +45,6 @@ final class LivroValidacaoTest extends TestCase
     }
 
     /**
-     * Cada caso parte de um livro válido e quebra uma regra só.
-     *
      * @return iterable<string, array{string, \Closure(Livro): void}>
      */
     public static function livrosInvalidos(): iterable
@@ -72,7 +70,6 @@ final class LivroValidacaoTest extends TestCase
         $livro = self::livroValido();
         $quebraRegra($livro);
 
-        // A propriedade alterada é a única inválida: o teste não passa por causa de outra regra.
         self::assertSame([$propriedadeInvalida], self::propriedadesInvalidas($livro));
     }
 }

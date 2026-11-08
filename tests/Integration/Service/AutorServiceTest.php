@@ -9,10 +9,6 @@ use App\Service\AutorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-/**
- * Teste de integração (ADR 0009): Service real, Doctrine real e PostgreSQL de teste. Cada teste roda numa
- * transação desfeita ao final (DAMA\DoctrineTestBundle).
- */
 final class AutorServiceTest extends KernelTestCase
 {
     public function testExcluirAutorComLivrosLancaExcecaoEMantemOVinculo(): void

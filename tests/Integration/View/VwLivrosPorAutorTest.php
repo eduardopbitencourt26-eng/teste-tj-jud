@@ -8,10 +8,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-/**
- * Teste de integração da view do relatório (ADR 0009): o SQL da view roda no PostgreSQL de teste, dentro da
- * transação desfeita ao final (DAMA\DoctrineTestBundle).
- */
 final class VwLivrosPorAutorTest extends KernelTestCase
 {
     public function testLivroComDoisAutoresApareceSobCadaUmDeles(): void

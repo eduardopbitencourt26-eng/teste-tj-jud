@@ -54,7 +54,7 @@ o mesmo estágio base, então as extensões PHP são idênticas nos dois ambient
 | Arquivo | Quando é usado | Papel |
 |---|---|---|
 | `compose.yaml` | sempre | base comum: serviço `php` (FrankenPHP), serviço `database` (PostgreSQL), portas, volumes, variáveis compartilhadas |
-| `compose.override.yaml` | **automaticamente** em todo `docker compose ...` sem `-f` | desenvolvimento: estágio `frankenphp_dev`, código montado com bind mount (`./:/app`), Xdebug, worker em modo watch, porta do banco exposta |
+| `compose.override.yaml` | **automaticamente** em todo `docker compose ...` sem `-f` | desenvolvimento: estágio `frankenphp_dev`, código montado com bind mount (`./:/app`), Xdebug, worker em modo watch, porta do banco exposta, healthcheck com 15 min de partida (a primeira subida roda o `composer install`, que no Windows passou de 10 min) |
 | `compose.prod.yaml` | **só quando pedido explicitamente**: `docker compose -f compose.yaml -f compose.prod.yaml up` | produção: estágio `frankenphp_prod`, sem bind mount, exige `APP_SECRET` e segredos reais via variáveis de ambiente |
 
 O Docker Compose mescla os arquivos na ordem em que são passados. Como o override é carregado sozinho,

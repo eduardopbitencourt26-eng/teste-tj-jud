@@ -5,7 +5,7 @@ namespace App\Exception;
 use App\Entity\Assunto;
 
 /**
- * Regra de negócio: um assunto em uso não pode ser excluído, senão sairia dos livros sem aviso.
+ *  um assunto em uso não pode ser excluído, senão sairia dos livros sem aviso.
  */
 final class AssuntoPossuiLivrosException extends \DomainException
 {

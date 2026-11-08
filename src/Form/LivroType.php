@@ -41,8 +41,7 @@ final class LivroType extends AbstractType
                 'attr' => ['maxlength' => 4, 'inputmode' => 'numeric', 'placeholder' => 'AAAA'],
             ])
             // input "string": o valor vai do campo para a entidade como string ("1234.56"), sem passar por
-            // float, o mesmo formato do DECIMAL e do Regex da entidade. grouping: sem ele, o separador de milhar
-            // de "1.234,56" é recusado; com ele, o campo aceita e exibe o formato pt-BR (1234,56 também vale).
+            // float, o mesmo formato do DECIMAL e do Regex da entidade. grouping: para o separador de milhar 
             ->add('valor', MoneyType::class, [
                 'label' => 'Valor',
                 'currency' => 'BRL',
@@ -50,8 +49,6 @@ final class LivroType extends AbstractType
                 'grouping' => true,
                 'invalid_message' => 'Informe o valor no formato 1.234,56.',
             ])
-            // by_reference false: o form chama addAutor()/removeAutor(), que mantêm os dois lados da relação
-            // em sincronia, em vez de substituir a coleção.
             ->add('autores', EntityType::class, [
                 'label' => 'Autores',
                 'class' => Autor::class,
@@ -82,10 +79,6 @@ final class LivroType extends AbstractType
         ));
     }
 
-    /**
-     * O MoneyType arredonda para 2 casas antes da validação: "1,234" viraria 1,23 sem aviso, e o Regex da
-     * entidade nunca veria a terceira casa. Este transformer olha o texto digitado, antes do arredondamento.
-     */
     private static function recusarMaisDeDuasCasas(?string $valor): ?string
     {
         $separador = (new \NumberFormatter(\Locale::getDefault(), \NumberFormatter::DECIMAL))

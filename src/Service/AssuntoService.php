@@ -9,10 +9,6 @@ use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Casos de uso de Assunto. O controller cuida só de HTTP; gravar e excluir passam por aqui, que é onde
- * entram as regras de negócio (ADR 0012).
- */
 final class AssuntoService
 {
     public function __construct(
@@ -35,9 +31,6 @@ final class AssuntoService
         return $this->assuntoRepository->count();
     }
 
-    /**
-     * Serve para cadastro e edição: persist() de um objeto já gerenciado não faz nada.
-     */
     public function salvar(Assunto $assunto): void
     {
         $this->entityManager->persist($assunto);
@@ -45,9 +38,6 @@ final class AssuntoService
     }
 
     /**
-     * Mesma situação do AutorService: o Doctrine apagaria os vínculos em livro_assunto antes do DELETE, e o
-     * assunto sumiria dos livros sem aviso. A regra é verificada antes do remove().
-     *
      * @throws AssuntoPossuiLivrosException
      */
     public function excluir(Assunto $assunto): void

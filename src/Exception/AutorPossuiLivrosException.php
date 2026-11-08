@@ -5,7 +5,7 @@ namespace App\Exception;
 use App\Entity\Autor;
 
 /**
- * Regra de negócio: um autor com livros não pode ser excluído, senão esses livros perderiam o autor.
+ * um autor com livros não pode ser excluído, senão esses livros perderiam o autor.
  */
 final class AutorPossuiLivrosException extends \DomainException
 {

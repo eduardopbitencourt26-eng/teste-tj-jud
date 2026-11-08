@@ -24,8 +24,6 @@ class Autor
     private ?string $nome = null;
 
     /**
-     * Lado inverso: quem grava o vínculo em livro_autor é Livro::$autores.
-     *
      * @var Collection<int, Livro>
      */
     #[ORM\ManyToMany(targetEntity: Livro::class, mappedBy: 'autores')]

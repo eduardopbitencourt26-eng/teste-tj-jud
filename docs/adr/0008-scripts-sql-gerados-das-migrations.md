@@ -40,6 +40,8 @@ Verificado: aplicar `01_create_tables.sql` num banco vazio produz um esquema id�
 ## Consequências
 - Toda migration nova precisa de uma linha em `SCRIPTS` e de rodar `make sql-export`. Os dois vão no mesmo
   commit que a migration.
+- A regra vale para o esquema (`01` e `02`). A carga inicial (`03`) não vem de migration: é escrita à mão e
+  executada também pelas fixtures, para continuar com uma fonte só (ADR 0019).
 - Os scripts herdam os nomes de índices e FKs gerados pelo Doctrine (ver ADR 0007).
 - Para aplicar os scripts, o README usa `psql -1`, que roda cada arquivo numa transação só: se um comando
   falha, nada fica pela metade.
