@@ -55,26 +55,27 @@ Para parar: `docker compose down` (mantém os dados). Para apagar também o banc
 
 ## Trocar portas ocupadas
 
-Por padrão o container publica as portas 80 (HTTP) e 443 (HTTPS e HTTP/3). Se outro programa já usa essas
-portas (Apache, IIS, outro container), suba com outras portas pelas variáveis `HTTP_PORT`, `HTTPS_PORT`
-e `HTTP3_PORT`:
+Por padrão são publicadas as portas 80 (HTTP), 443 (HTTPS e HTTP/3) e, em desenvolvimento, 5432
+(PostgreSQL). Se outro programa já usa alguma delas (Apache, IIS, um PostgreSQL local, outro container), o
+`up` falha com `port is already allocated`. Suba com outras portas pelas variáveis `HTTP_PORT`,
+`HTTPS_PORT`, `HTTP3_PORT` e `POSTGRES_PORT`:
 
 ```bash
 # Linux, macOS, Git Bash
-HTTP_PORT=8080 HTTPS_PORT=8443 HTTP3_PORT=8443 docker compose up --wait
+HTTP_PORT=8080 HTTPS_PORT=8443 HTTP3_PORT=8443 POSTGRES_PORT=5433 docker compose up --wait
 ```
 
 ```powershell
 # PowerShell
-$env:HTTP_PORT=8080; $env:HTTPS_PORT=8443; $env:HTTP3_PORT=8443; docker compose up --wait
+$env:HTTP_PORT=8080; $env:HTTPS_PORT=8443; $env:HTTP3_PORT=8443; $env:POSTGRES_PORT=5433; docker compose up --wait
 ```
 
-A aplicação passa a responder em **https://localhost:8443**.
+A aplicação passa a responder em **https://localhost:8443**, e o banco em `localhost:5433`.
 
 Para não repetir as variáveis, coloque-as no `.env.local`, que não é versionado:
 
 ```bash
-printf 'HTTP_PORT=8080\nHTTPS_PORT=8443\nHTTP3_PORT=8443\n' >> .env.local
+printf 'HTTP_PORT=8080\nHTTPS_PORT=8443\nHTTP3_PORT=8443\nPOSTGRES_PORT=5433\n' >> .env.local
 docker compose --env-file .env --env-file .env.local up --wait
 ```
 
@@ -84,8 +85,21 @@ arquivo informado vence.
 
 Para descobrir quem ocupa uma porta: `netstat -ano | findstr :80` (Windows) ou `sudo lsof -i :80` (Linux/macOS).
 
-O PostgreSQL não usa porta fixa no host: em desenvolvimento a porta 5432 do container é publicada numa porta
-aleatória, para não conflitar com um PostgreSQL local. Para ver qual foi: `docker compose port database 5432`.
+### Conectar ao banco por um cliente (DBeaver, pgAdmin, psql)
+
+Em desenvolvimento o PostgreSQL é publicado em `127.0.0.1`, ou seja, acessível só da própria máquina, não da
+rede. Em produção a porta não é publicada.
+
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Porta | `5432` (ou o valor de `POSTGRES_PORT`) |
+| Banco | `app` (testes: `app_test`) |
+| Usuário | `app` |
+| Senha | `!ChangeMe!` |
+
+Esses são os valores padrão do `compose.yaml` (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). A
+aplicação não usa essa porta: dentro do Docker, o PHP fala com o banco pela rede interna, em `database:5432`.
 
 ## Comandos do dia a dia
 

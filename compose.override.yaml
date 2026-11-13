@@ -44,7 +44,7 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     ports:
-      - "5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
 ###< doctrine/doctrine-bundle ###
 
   # Compila o front-end com o Encore (ADR 0015). Não sobe com "docker compose up": roda sob demanda,
