@@ -8,7 +8,7 @@ Teste técnico: CRUD de Livros, Autores e Assuntos com relatório agrupado por a
 |---|---|
 | Linguagem | PHP 8.5 |
 | Framework | Symfony 7.4 LTS |
-| Servidor | FrankenPHP (Caddy) em modo worker |
+| Servidor | FrankenPHP (Caddy) |
 | Banco de dados | PostgreSQL 16 |
 | ORM | Doctrine ORM + Doctrine Migrations |
 | Ambiente | Docker, a partir do template oficial [symfony-docker](https://github.com/dunglas/symfony-docker) |
@@ -17,16 +17,13 @@ Os motivos de cada escolha estão nos [ADRs](#decisões-de-arquitetura-adrs).
 
 ## Pré-requisitos
 
-- [Docker](https://docs.docker.com/get-docker/) com Docker Compose v2 (`docker compose version`).
-- Portas **80** e **443** livres no host. Se estiverem ocupadas, veja [Trocar portas](#trocar-portas-ocupadas).
-- Opcional: `make`, para usar os atalhos do `Makefile`. Todos os atalhos têm o comando equivalente abaixo.
-
-Não é preciso instalar PHP, Composer, Node nem PostgreSQL: tudo roda em containers.
+- Docker com Docker Compose v2.
+- Portas **80** e **443** livres no host.
 
 ## Instalação do zero
 
 ```bash
-git clone <url-do-repositorio> livros
+git clone https://github.com/eduardopbitencourt26-eng/teste-tj-jud.git livros
 cd livros
 
 docker compose build --pull --no-cache
@@ -40,55 +37,24 @@ docker compose exec php bin/console doctrine:migrations:migrate --no-interaction
 docker compose exec php bin/console doctrine:fixtures:load --no-interaction
 ```
 
-Com `make`, os mesmos passos são `make setup`. O último comando carrega os [dados de exemplo](#dados-de-exemplo)
-e **apaga o que já existir no banco de desenvolvimento**. Para começar com o banco vazio, pule-o.
-
-Depois, acesse **https://localhost**. O certificado é gerado por uma autoridade certificadora local do
-Caddy, então o navegador mostra um aviso na primeira vez: aceite a exceção.
-
-**A primeira subida é lenta:** o `docker compose up --wait` instala as dependências do Composer dentro do
-container antes de ficar pronto. No Windows e no Mac, com o projeto montado do disco do host, isso pode
-passar de 10 minutos (medido no Windows: cerca de 10 minutos); no Linux é bem mais rápido. As subidas seguintes levam segundos. A primeira requisição
-também leva alguns segundos, porque o Symfony monta o cache.
-
 Para parar: `docker compose down` (mantém os dados). Para apagar também o banco: `docker compose down -v`.
 
 ## Trocar portas ocupadas
 
-Por padrão são publicadas as portas 80 (HTTP), 443 (HTTPS e HTTP/3) e, em desenvolvimento, 5432
-(PostgreSQL). Se outro programa já usa alguma delas (Apache, IIS, um PostgreSQL local, outro container), o
-`up` falha com `port is already allocated`. Suba com outras portas pelas variáveis `HTTP_PORT`,
-`HTTPS_PORT`, `HTTP3_PORT` e `POSTGRES_PORT`:
+Caso necessário, troque as portas que estejam ocupadas. Coloque-as no `.env.local`, que não é versionado:
 
-```bash
-# Linux, macOS, Git Bash
-HTTP_PORT=8080 HTTPS_PORT=8443 HTTP3_PORT=8443 POSTGRES_PORT=5433 docker compose up --wait
+```env
+`HTTP_PORT` = PORTA_DISPONIVEL,
+`HTTPS_PORT` = PORTA_DISPONIVEL, 
+`HTTP3_PORT` = PORTA_DISPONIVEL,
+`POSTGRES_PORT` = PORTA_DISPONIVEL
 ```
 
-```powershell
-# PowerShell
-$env:HTTP_PORT=8080; $env:HTTPS_PORT=8443; $env:HTTP3_PORT=8443; $env:POSTGRES_PORT=5433; docker compose up --wait
-```
-
-A aplicação passa a responder em **https://localhost:8443**, e o banco em `localhost:5433`.
-
-Para não repetir as variáveis, coloque-as no `.env.local`, que não é versionado:
-
-```bash
-printf 'HTTP_PORT=8080\nHTTPS_PORT=8443\nHTTP3_PORT=8443\nPOSTGRES_PORT=5433\n' >> .env.local
-docker compose --env-file .env --env-file .env.local up --wait
-```
-
-Não coloque as portas no `.env`: ele é versionado e vale para todos (ver [ADR 0003](docs/adr/0003-variaveis-de-ambiente.md)).
+Não coloque as portas no `.env`, pois ele é versionado e vale para todos (ver [ADR 0003](docs/adr/0003-variaveis-de-ambiente.md)).
 O Docker Compose lê sozinho apenas o `.env`; o `.env.local` precisa ser passado com `--env-file`, e o último
 arquivo informado vence.
 
-Para descobrir quem ocupa uma porta: `netstat -ano | findstr :80` (Windows) ou `sudo lsof -i :80` (Linux/macOS).
-
 ### Conectar ao banco por um cliente (DBeaver, pgAdmin, psql)
-
-Em desenvolvimento o PostgreSQL é publicado em `127.0.0.1`, ou seja, acessível só da própria máquina, não da
-rede. Em produção a porta não é publicada.
 
 | Campo | Valor |
 |---|---|
@@ -98,32 +64,7 @@ rede. Em produção a porta não é publicada.
 | Usuário | `app` |
 | Senha | `!ChangeMe!` |
 
-Esses são os valores padrão do `compose.yaml` (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). A
-aplicação não usa essa porta: dentro do Docker, o PHP fala com o banco pela rede interna, em `database:5432`.
-
-## Comandos do dia a dia
-
-| `make` | Comando equivalente | O que faz |
-|---|---|---|
-| `make up` | `docker compose up --wait` | Sobe os containers |
-| `make down` | `docker compose down --remove-orphans` | Para os containers (mantém os dados) |
-| `make logs` | `docker compose logs --tail=100 --follow` | Acompanha os logs |
-| `make sh` | `docker compose exec php bash` | Shell dentro do container PHP |
-| `make console c="about"` | `docker compose exec php bin/console about` | Roda um comando do Symfony |
-| `make reset-db` | ver `Makefile` | Apaga e recria o banco de desenvolvimento |
-| `make fixtures` | `docker compose exec php bin/console doctrine:fixtures:load --no-interaction` | Apaga os dados e carrega os dados de exemplo |
-| `make sql-export` | `docker compose exec -T php sh bin/sql-export` | Regenera os scripts de `database/` a partir das migrations |
-| `make assets` | `docker compose run --rm node npm ci` e `npm run dev`, depois `docker compose restart php` | Instala as dependências do front-end e compila os assets |
-| `make watch` | `docker compose run --rm node npm run watch` | Recompila os assets a cada alteração em `assets/` |
-| `make build-assets` | `docker compose run --rm node npm run build`, depois `docker compose restart php` | Compila os assets minificados, como em produção |
-
-`make` não vem instalado no Windows. Opções: rodar os comandos equivalentes, usar o WSL ou instalar com
-`winget install ezwinports.make`.
-
-**Editando código no Windows:** em dev, o servidor reinicia sozinho quando um arquivo de `src/` ou `config/`
-muda. No Docker Desktop do Windows, com o projeto numa pasta do Windows (`C:\...`), essas alterações não
-chegam ao container. Depois de editar PHP ou configuração, rode `docker compose restart php`. Templates Twig
-não precisam disso. Detalhes no [ADR 0011](docs/adr/0011-watch-do-worker-em-dev.md).
+Esses são os valores padrão do `compose.yaml`.
 
 ## Front-end
 
@@ -141,14 +82,16 @@ O CSS e o JS ficam em [`assets/`](assets/) e são compilados pelo **Webpack Enco
 | [`tsconfig.json`](tsconfig.json) | Configuração do TypeScript, compilado pelo Encore |
 | [`webpack.config.js`](webpack.config.js) | Configuração do Encore |
 
-Para mudar a cor principal, altere `$cor-primaria` e recompile (`make assets` ou `make watch`).
+Para mudar a cor principal, altere `$cor-primaria` e recompile com: 
+`make assets` OU:
+```bash
+docker compose run --rm node npm run dev
+```
 
-O build é necessário só para ver o layout: os testes não dependem dele. Na imagem de produção, os assets são
-compilados num estágio do `Dockerfile` (`assets_builder`), e a imagem final não tem Node.
-
-Ao trocar entre o build de dev e o de produção, reinicie o php (`docker compose restart php`; os atalhos do
-`make` já fazem isso). Em modo worker, o servidor guarda em memória a lista de arquivos do build, e o build
-de produção muda os nomes (`app.3f2a1c.css`).
+Se preferir `make watch`, OU:
+```bash
+docker compose run --rm node npm run watch
+```
 
 ## Testes
 
@@ -161,9 +104,7 @@ docker compose exec php bin/phpunit
 Com `make`: `make test`. Os testes usam um banco separado (`app_test`), então não alteram os dados de
 desenvolvimento. Para ver cada teste descrito em frases: `docker compose exec php bin/phpunit --testdox`.
 
-A suíte é uma amostra enxuta: TDD nas regras de negócio críticas, cobrindo os três tipos de teste
-(unitário, integração e funcional). O plano completo está no
-[ADR 0009](docs/adr/0009-estrategia-de-testes.md).
+Tipos de teste (unitário, integração e funcional) [ADR 0009](docs/adr/0009-estrategia-de-testes.md).
 
 | Teste | Tipo | Arquivo |
 |---|---|---|
@@ -190,7 +131,7 @@ subtotal de cada um; no total geral, cada livro é contado uma vez só.
 
 O [`database/03_carga_inicial.sql`](database/03_carga_inicial.sql) é a fonte única dos dados de exemplo. A
 fixture [`CargaInicialFixtures`](src/DataFixtures/CargaInicialFixtures.php) executa esse mesmo arquivo, então
-carregar pelo Doctrine (`make fixtures`) ou pelo `psql` dá o mesmo resultado
+carregar pelo Doctrine (`make fixtures`) ou pelo `psql` dá o mesmo resultado, a diferença é que precisaria rodar os comandos manualmente após as criações de tabelas e migrations.
 ([ADR 0019](docs/adr/0019-dados-de-exemplo.md)).
 
 São 7 autores, 7 assuntos e 7 livros, escolhidos para exercitar o relatório:
@@ -208,11 +149,7 @@ daria R$ 586,40, porque os dois livros com 2 autores entrariam duas vezes.
 
 ## Scripts SQL
 
-A pasta [`database/`](database/) tem scripts SQL puros, para criar o banco sem o Doctrine (por exemplo,
-quando um DBA aplica o esquema). **Os scripts do esquema são gerados a partir das migrations, não escritos à
-mão:** as entidades e as migrations são a fonte única da verdade
-([ADR 0008](docs/adr/0008-scripts-sql-gerados-das-migrations.md)). A carga inicial é a exceção: não vem de
-migration, e é a fonte dos dados de exemplo ([ADR 0019](docs/adr/0019-dados-de-exemplo.md)).
+A pasta [`database/`](database/) tem scripts SQL puros, para criar o banco sem o Doctrine. Para inserir a carga inicial é necessário anteriormente ter as migrations e banco de dados já criados.
 
 | Script | Conteúdo | Origem |
 |---|---|---|
@@ -220,19 +157,8 @@ migration, e é a fonte dos dados de exemplo ([ADR 0019](docs/adr/0019-dados-de-
 | [`02_view_relatorio.sql`](database/02_view_relatorio.sql) | View `vw_livros_por_autor`, usada pelo relatório | Gerado de `migrations/Version20261107233000.php` |
 | [`03_carga_inicial.sql`](database/03_carga_inicial.sql) | Dados de exemplo | Escrito à mão; também usado pelas fixtures |
 
-Para aplicar, em ordem, num banco vazio (`-1` roda cada script numa transação só). O exemplo cria um banco
-`livros` separado, para não misturar com o `app` da aplicação:
 
-```bash
-docker compose exec database createdb -U app livros
-docker compose exec -T database psql -U app -d livros -1 -v ON_ERROR_STOP=1 < database/01_create_tables.sql
-docker compose exec -T database psql -U app -d livros -1 -v ON_ERROR_STOP=1 < database/02_view_relatorio.sql
-docker compose exec -T database psql -U app -d livros -1 -v ON_ERROR_STOP=1 < database/03_carga_inicial.sql
-```
-
-Use **ou** os scripts **ou** as migrations no mesmo banco, não os dois: as tabelas já existiriam.
-Os nomes seguem o modelo do enunciado em minúsculas (`Livro.CodL` → `livro.codl`), conforme o
-[ADR 0005](docs/adr/0005-identificadores-no-postgresql.md).
+Use **ou** os scripts **ou** as migrations no mesmo banco, não os dois.
 
 ### Regenerar os scripts
 
@@ -243,11 +169,6 @@ make sql-export
 # sem make:
 docker compose exec -T php sh bin/sql-export
 ```
-
-O [`bin/sql-export`](bin/sql-export) roda `doctrine:migrations:execute --up --write-sql` para cada migration,
-num banco descartável que é criado e apagado na hora. O banco de desenvolvimento não é tocado. Uma migration
-nova entra na lista `SCRIPTS` no topo do arquivo, com o nome do script que ela gera. Rodar de novo sem mudanças
-nas migrations produz arquivos idênticos.
 
 ## Estrutura do projeto
 
@@ -277,33 +198,6 @@ tests/
   Functional/           Cadastro de livro pelo formulário; resposta em PDF
 ```
 
-## Implantação em produção
-
-O `Dockerfile` tem um estágio de produção (`frankenphp_prod`): dependências sem as de desenvolvimento,
-autoloader otimizado, assets compilados e minificados no estágio `assets_builder` (a imagem final não tem
-Node) e o `php.ini` de produção. Os segredos vêm do ambiente, nunca do repositório:
-
-```bash
-APP_SECRET=$(openssl rand -hex 32) \
-CADDY_MERCURE_JWT_SECRET=$(openssl rand -hex 32) \
-POSTGRES_PASSWORD='<senha-forte>' \
-SERVER_NAME=livros.exemplo.gov.br \
-docker compose -f compose.yaml -f compose.prod.yaml build --pull
-# (mesmas variáveis)
-docker compose -f compose.yaml -f compose.prod.yaml up --wait
-docker compose -f compose.yaml -f compose.prod.yaml exec php bin/console doctrine:migrations:migrate --no-interaction
-```
-
-Em produção, o entrypoint do container já roda as migrations pendentes ao subir; o último comando é o
-caminho explícito. As fixtures não existem na imagem de produção (pacote de desenvolvimento): para dados de
-exemplo, use o `03_carga_inicial.sql`. Com `SERVER_NAME` apontando para um domínio real, o Caddy obtém o
-certificado HTTPS sozinho.
-
-Para testar a imagem de produção na mesma máquina do desenvolvimento, use um nome de projeto separado
-(`docker compose -p livros-prod -f compose.yaml -f compose.prod.yaml ...`). Sem isso, ela reaproveita o volume
-`caddy_data` criado pelo container de dev (que roda como root), e o Caddy de produção, que roda como
-`www-data`, não consegue ler os certificados.
-
 ## Decisões de arquitetura (ADRs)
 
 Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
@@ -322,7 +216,7 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0012 - Arquitetura em camadas](docs/adr/0012-arquitetura-em-camadas.md): Controller fino, Service com os casos de uso, Repository com as consultas.
 - [0013 - make:crud como ponto de partida](docs/adr/0013-make-crud-como-ponto-de-partida.md): o que mudou no código gerado e por quê.
 - [0014 - Formulário do livro](docs/adr/0014-formulario-do-livro.md): valor em R$ sem float, recusa de mais de 2 casas, autores e assuntos em caixas de seleção.
-- [0015 - Front-end com Webpack Encore](docs/adr/0015-front-end-com-encore.md): Encore no lugar do AssetMapper, Node no Compose, Bootstrap via SCSS com variáveis próprias, sem Stimulus e Turbo.
+- [0015 - Front-end com Webpack Encore](docs/adr/0015-front-end-com-encore.md): Encore no lugar do AssetMapper, Node no Compose, Bootstrap via SCSS com variáveis próprias.
 - [0016 - Tratamento de erros](docs/adr/0016-tratamento-de-erros.md): exceções de domínio, rede de segurança da chave estrangeira, banco fora do ar e páginas de erro.
 - [0017 - Dompdf como componente de relatório](docs/adr/0017-dompdf-como-componente-de-relatorio.md): template Twig convertido em PDF, sem acesso remoto, fuso de Brasília.
 - [0018 - Desenho da view do relatório](docs/adr/0018-view-do-relatorio.md): uma linha por autor × livro, `LEFT JOIN` em assuntos, total geral sem contar livros em dobro.
