@@ -7,8 +7,8 @@
 
     {{ form_start(form) }}
         <div class="row">
-            <div class="col-12 col-md-6">{{ form_row(form.titulo) }}</div>
-            <div class="col-12 col-md-6">{{ form_row(form.editora) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.titulo, {help: include('_limite_caracteres.html.twig', {campo: form.titulo}), help_html: true}) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.editora, {help: include('_limite_caracteres.html.twig', {campo: form.editora}), help_html: true}) }}</div>
             <div class="col-6 col-md-2">{{ form_row(form.edicao) }}</div>
             <div class="col-6 col-md-3">{{ form_row(form.anoPublicacao) }}</div>
             <div class="col-12 col-md-4">{{ form_row(form.valor) }}</div>

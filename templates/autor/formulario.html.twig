@@ -6,7 +6,7 @@
     <h1 class="h3 mb-3">{{ titulo }}</h1>
 
     {{ form_start(form) }}
-        {{ form_widget(form) }}
+        {{ form_row(form.nome, {help: include('_limite_caracteres.html.twig', {campo: form.nome}), help_html: true}) }}
         {{ include('_form_actions.html.twig', {voltar_url: path('autor_listar')}) }}
     {{ form_end(form) }}
 {% endblock %}

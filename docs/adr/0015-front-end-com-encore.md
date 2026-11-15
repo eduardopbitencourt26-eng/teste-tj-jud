@@ -63,4 +63,4 @@ quando o `public/build` não existe.
 - Em modo worker, o `EntrypointLookup` guarda o `entrypoints.json` em memória (o `reset()` entre requisições
   não o limpa). Ao trocar entre o build de dev e o de produção, que mudam os nomes dos arquivos, é preciso
   reiniciar o php. Os atalhos `make assets` e `make build-assets` já fazem isso.
-- TypeScript e um Web Component ficam como opcionais, para o fim do projeto.
+- TypeScript e um Web Component ficam como opcionais, para o fim do projeto. Feitos no ADR 0020.

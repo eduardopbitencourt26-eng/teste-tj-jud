@@ -136,7 +136,9 @@ O CSS e o JS ficam em [`assets/`](assets/) e são compilados pelo **Webpack Enco
 |---|---|
 | [`assets/styles/_variaveis.scss`](assets/styles/_variaveis.scss) | **Cores e tamanhos do projeto** (`$cor-primaria`, `$tamanho-fonte-base`, `$raio-borda`...), passadas para as variáveis do Bootstrap antes do import dele |
 | [`assets/styles/app.scss`](assets/styles/app.scss) | Importa as variáveis e o Bootstrap, e define os componentes próprios (lista de opções, tabela, cartões) |
-| [`assets/app.js`](assets/app.js) | Ponto de entrada: o SCSS e o plugin de colapso do Bootstrap (menu no celular) |
+| [`assets/app.js`](assets/app.js) | Ponto de entrada: o SCSS, o plugin de colapso do Bootstrap (menu no celular) e o contador de caracteres |
+| [`assets/componentes/limite-caracteres.ts`](assets/componentes/limite-caracteres.ts) | Web Component `<limite-caracteres>`, em TypeScript, que mostra "N/40" abaixo dos campos de texto ([ADR 0020](docs/adr/0020-web-component-com-shadow-dom.md)) |
+| [`tsconfig.json`](tsconfig.json) | Configuração do TypeScript, compilado pelo Encore |
 | [`webpack.config.js`](webpack.config.js) | Configuração do Encore |
 
 Para mudar a cor principal, altere `$cor-primaria` e recompile (`make assets` ou `make watch`).
@@ -253,7 +255,7 @@ O código segue três camadas: o Controller trata o HTTP, o Service executa os c
 grava) e o Repository faz as consultas ([ADR 0012](docs/adr/0012-arquitetura-em-camadas.md)).
 
 ```
-assets/                 SCSS (variáveis de cor e tamanho) e JS, compilados pelo Encore
+assets/                 SCSS (variáveis de cor e tamanho), JS e o Web Component em TypeScript, compilados pelo Encore
 config/                 Configuração do Symfony (packages/, routes, services)
 database/               Scripts SQL: esquema e view (gerados) e dados de exemplo
 docs/adr/               Decisões de arquitetura
@@ -325,3 +327,4 @@ Cada decisão relevante está registrada em [`docs/adr/`](docs/adr/):
 - [0017 - Dompdf como componente de relatório](docs/adr/0017-dompdf-como-componente-de-relatorio.md): template Twig convertido em PDF, sem acesso remoto, fuso de Brasília.
 - [0018 - Desenho da view do relatório](docs/adr/0018-view-do-relatorio.md): uma linha por autor × livro, `LEFT JOIN` em assuntos, total geral sem contar livros em dobro.
 - [0019 - Dados de exemplo num script SQL único](docs/adr/0019-dados-de-exemplo.md): a fixture executa o `03_carga_inicial.sql`.
+- [0020 - Contador de caracteres como Web Component](docs/adr/0020-web-component-com-shadow-dom.md): Custom Element em TypeScript, Shadow DOM para o estilo próprio, formulário funcional sem JS.

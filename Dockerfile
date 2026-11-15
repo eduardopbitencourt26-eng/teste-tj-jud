@@ -98,7 +98,7 @@ WORKDIR /app
 COPY --link package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
-COPY --link webpack.config.js ./
+COPY --link webpack.config.js tsconfig.json ./
 COPY --link assets assets/
 RUN npm run build
 
